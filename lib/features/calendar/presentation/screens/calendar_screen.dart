@@ -93,24 +93,65 @@ class CalendarScreen extends ConsumerWidget {
             ),
           ),
           Expanded(
-            child: activitiesAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
-              data: (_) {
-                if (view == CalendarView.week) {
-                  return WeekView(selectedDate: selectedDate);
-                }
-                if (view == CalendarView.month) {
-                  return MonthView(selectedDate: selectedDate);
-                }
-                if (occurrences.isEmpty) {
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              child: activitiesAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, _) => Center(child: Text('Error: $e')),
+                data: (_) {
+                  if (view == CalendarView.week) {
+                    return WeekView(
+                      key: ValueKey('week-$selectedDate'),
+                      selectedDate: selectedDate,
+                    );
+                  }
+                  if (view == CalendarView.month) {
+                    return MonthView(
+                      key: ValueKey('month-$selectedDate'),
+                      selectedDate: selectedDate,
+                    );
+                  }
+                  if (occurrences.isEmpty) {
+                    return Column(
+                      key: ValueKey('day-empty-$selectedDate'),
+                      children: [
+                        _DateChip(date: selectedDate),
+                        Expanded(
+                          child: TimeGrid(
+                            date: selectedDate,
+                            occurrences: const [],
+                            onEmptyTap: (h, m) => context.go(
+                              '/activity/new?date=${selectedDate.toIso8601String()}&hour=$h',
+                            ),
+                            onBlockTap: (occ) =>
+                                context.go('/activity/${occ.activityId}'),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(
+                            'Sin actividades para este día',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
                   return Column(
+                    key: ValueKey('day-$selectedDate'),
                     children: [
                       _DateChip(date: selectedDate),
                       Expanded(
                         child: TimeGrid(
                           date: selectedDate,
-                          occurrences: const [],
+                          occurrences: occurrences,
                           onEmptyTap: (h, m) => context.go(
                             '/activity/new?date=${selectedDate.toIso8601String()}&hour=$h',
                           ),
@@ -118,38 +159,10 @@ class CalendarScreen extends ConsumerWidget {
                               context.go('/activity/${occ.activityId}'),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text(
-                          'Sin actividades para este día',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                              ),
-                        ),
-                      ),
                     ],
                   );
-                }
-                return Column(
-                  children: [
-                    _DateChip(date: selectedDate),
-                    Expanded(
-                      child: TimeGrid(
-                        date: selectedDate,
-                        occurrences: occurrences,
-                        onEmptyTap: (h, m) => context.go(
-                          '/activity/new?date=${selectedDate.toIso8601String()}&hour=$h',
-                        ),
-                        onBlockTap: (occ) =>
-                            context.go('/activity/${occ.activityId}'),
-                      ),
-                    ),
-                  ],
-                );
-              },
+                },
+              ),
             ),
           ),
         ],

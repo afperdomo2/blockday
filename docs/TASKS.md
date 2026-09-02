@@ -60,11 +60,11 @@ en verde (ver AGENTS.md).
 
 ## Hito 8 — Pulido
 
-- [ ] Animaciones y gestos según skill `apple-design`
+- [x] Animaciones y gestos según skill `apple-design`
       (springs, materiales, feedback)
-- [ ] Materiales translúcidos en barras/sheets
-- [ ] Dark mode pulido
-- [ ] Vacíos de UI (empty states) y errores de formulario
+- [x] Materiales translúcidos en barras/sheets
+- [x] Dark mode pulido
+- [x] Vacíos de UI (empty states) y errores de formulario
 
 ## Fase 2 (fuera de v1)
 
