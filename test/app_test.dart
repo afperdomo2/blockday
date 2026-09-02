@@ -1,4 +1,6 @@
 import 'package:blockday/app.dart';
+import 'package:blockday/features/activities/data/app_database.dart';
+import 'package:blockday/features/activities/providers/activities_providers.dart';
 import 'package:blockday/features/activities/providers/activities_stream_provider.dart';
 import 'package:blockday/routes/app_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,9 +17,12 @@ void main() {
   });
 
   testWidgets('shows calendar home screen', (tester) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          appDatabaseProvider.overrideWithValue(db),
           activitiesStreamProvider.overrideWith((ref) => Stream.value([])),
         ],
         child: const BlockdayApp(),
@@ -30,9 +35,12 @@ void main() {
   });
 
   testWidgets('navigates to new activity editor', (tester) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          appDatabaseProvider.overrideWithValue(db),
           activitiesStreamProvider.overrideWith((ref) => Stream.value([])),
         ],
         child: const BlockdayApp(),
@@ -47,9 +55,12 @@ void main() {
   });
 
   testWidgets('edit route opens editor in edit mode', (tester) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          appDatabaseProvider.overrideWithValue(db),
           activitiesStreamProvider.overrideWith((ref) => Stream.value([])),
         ],
         child: const BlockdayApp(),

@@ -45,12 +45,12 @@ en verde (ver AGENTS.md).
 
 ## Hito 6 — CRUD de actividades
 
-- [ ] Pantalla editor (nueva/editar): título, notas, color
-- [ ] Modo puntual: fecha + hora inicio/fin
-- [ ] Modo recurrente: días de semana + condición de fin
+- [x] Pantalla editor (nueva/editar): título, notas, color
+- [x] Modo puntual: fecha + hora inicio/fin
+- [x] Modo recurrente: días de semana + condición de fin
       (sin fin / hasta fecha / N veces)
-- [ ] Eliminar actividad; excluir una ocurrencia concreta
-- [ ] Widget tests del formulario
+- [x] Eliminar actividad; excluir una ocurrencia concreta
+- [x] Widget tests del formulario
 
 ## Hito 7 — Vistas semana y mes
 
