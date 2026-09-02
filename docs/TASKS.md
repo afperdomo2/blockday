@@ -23,10 +23,10 @@ en verde (ver AGENTS.md).
 
 ## Hito 3 — Dominio (motor de recurrencia)
 
-- [ ] Modelos: `Activity`, `RecurrenceRule`, `RecurrenceEnd`, `Occurrence`
-- [ ] Validaciones de dominio (horas, weekdays, límites)
-- [ ] `expandOccurrences()` con barrido semanal + count/until/exclusiones
-- [ ] Tests unitarios exhaustivos (bordes de mes, bisiesto, hasta-fecha,
+- [x] Modelos: `Activity`, `RecurrenceRule`, `RecurrenceEnd`, `Occurrence`
+- [x] Validaciones de dominio (horas, weekdays, límites)
+- [x] `expandOccurrences()` con barrido semanal + count/until/exclusiones
+- [x] Tests unitarios exhaustivos (bordes de mes, bisiesto, hasta-fecha,
       N veces, exclusiones, rango vacío)
 
 ## Hito 4 — Persistencia (Drift)
