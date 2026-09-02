@@ -37,11 +37,11 @@ en verde (ver AGENTS.md).
 
 ## Hito 5 — Vista día
 
-- [ ] `CalendarState` (fecha seleccionada, vista) + providers
-- [ ] Time-grid del día (00–24h) con bloques de actividades
-- [ ] Render de ocurrencias por rango (provider family)
-- [ ] Navegación entre días (botones + swipe)
-- [ ] Tap en bloque → abrir editor; tap en hueco → nueva actividad
+- [x] `CalendarState` (fecha seleccionada, vista) + providers
+- [x] Time-grid del día (00–24h) con bloques de actividades
+- [x] Render de ocurrencias por rango (provider family)
+- [x] Navegación entre días (botones + swipe)
+- [x] Tap en bloque → abrir editor; tap en hueco → nueva actividad
 
 ## Hito 6 — CRUD de actividades
 
