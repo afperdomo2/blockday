@@ -54,9 +54,9 @@ en verde (ver AGENTS.md).
 
 ## Hito 7 — Vistas semana y mes
 
-- [ ] Vista semana (7 columnas con time-grid)
-- [ ] Vista mes (grid tipo Google Calendar con puntos/resumen)
-- [ ] Selector de vista (segmented) sincronizado con providers
+- [x] Vista semana (7 columnas con time-grid)
+- [x] Vista mes (grid tipo Google Calendar con puntos/resumen)
+- [x] Selector de vista (segmented) sincronizado con providers
 
 ## Hito 8 — Pulido
 

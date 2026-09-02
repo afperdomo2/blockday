@@ -58,6 +58,26 @@ class CalendarStateNotifier extends Notifier<CalendarState> {
     goTo(DateTime(d.year, d.month, d.day - 1));
   }
 
+  void nextWeek() {
+    final d = state.selectedDate;
+    goTo(DateTime(d.year, d.month, d.day + 7));
+  }
+
+  void previousWeek() {
+    final d = state.selectedDate;
+    goTo(DateTime(d.year, d.month, d.day - 7));
+  }
+
+  void nextMonth() {
+    final d = state.selectedDate;
+    goTo(DateTime(d.year, d.month + 1, 1));
+  }
+
+  void previousMonth() {
+    final d = state.selectedDate;
+    goTo(DateTime(d.year, d.month - 1, 1));
+  }
+
   void today() {
     final now = DateTime.now();
     goTo(DateTime(now.year, now.month, now.day));
