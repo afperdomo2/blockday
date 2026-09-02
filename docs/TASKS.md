@@ -31,9 +31,9 @@ en verde (ver AGENTS.md).
 
 ## Hito 4 — Persistencia (Drift)
 
-- [ ] Tablas `activities` y `activity_exclusions` + DAOs
-- [ ] `ActivitiesRepository` (CRUD + exclusiones + mapeo dominio↔fila)
-- [ ] Tests con base de datos en memoria
+- [x] Tablas `activities` y `activity_exclusions` + DAOs
+- [x] `ActivitiesRepository` (CRUD + exclusiones + mapeo dominio↔fila)
+- [x] Tests con base de datos en memoria
 
 ## Hito 5 — Vista día
 
