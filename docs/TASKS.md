@@ -14,12 +14,12 @@ en verde (ver AGENTS.md).
 
 ## Hito 2 — Foundation
 
-- [ ] Dependencias: `flutter_riverpod`, `drift`, `go_router`, `intl`, `uuid`
+- [x] Dependencias: `flutter_riverpod`, `drift`, `go_router`, `intl`, `uuid`
       (dev: `drift_dev`, `build_runner`)
-- [ ] Estructura feature-first (`core/`, `features/`, `shared/`, `routes/`)
-- [ ] Tema claro/oscuro + paleta de colores de actividades
-- [ ] Shell de app con `ProviderScope`, `MaterialApp.router`, go_router
-- [ ] Widget test del shell
+- [x] Estructura feature-first (`core/`, `features/`, `shared/`, `routes/`)
+- [x] Tema claro/oscuro + paleta de colores de actividades
+- [x] Shell de app con `ProviderScope`, `MaterialApp.router`, go_router
+- [x] Widget test del shell
 
 ## Hito 3 — Dominio (motor de recurrencia)
 
