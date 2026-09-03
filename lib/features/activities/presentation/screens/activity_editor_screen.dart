@@ -47,13 +47,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
   TimeOfDay _singleEnd = const TimeOfDay(hour: 10, minute: 0);
   TimeOfDay _recStart = const TimeOfDay(hour: 17, minute: 0);
   TimeOfDay _recEnd = const TimeOfDay(hour: 19, minute: 0);
-  Set<int> _weekdays = {
-    DateTime.monday,
-    DateTime.tuesday,
-    DateTime.wednesday,
-    DateTime.thursday,
-    DateTime.friday,
-  };
+  Set<int> _weekdays = {};
   DateTime _firstDate = DateTime.now();
   _EndCondition _endCondition = _EndCondition.never;
   DateTime _untilDate = DateTime.now().add(const Duration(days: 30));
@@ -323,6 +317,10 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
     if (mounted) context.go('/');
   }
 
+  void _goHome() {
+    if (mounted) context.go('/');
+  }
+
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.activityId != null;
@@ -332,13 +330,37 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
 
     if (isEditing && asyncActivity != null) {
       return asyncActivity.when(
-        loading: () => Scaffold(
-          appBar: AppBar(title: const Text('Cargando...')),
-          body: const Center(child: CircularProgressIndicator()),
+        loading: () => PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop) _goHome();
+          },
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('Cargando...'),
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: _goHome,
+              ),
+            ),
+            body: const Center(child: CircularProgressIndicator()),
+          ),
         ),
-        error: (e, _) => Scaffold(
-          appBar: AppBar(title: const Text('Error')),
-          body: Center(child: Text('Error: $e')),
+        error: (e, _) => PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop) _goHome();
+          },
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('Error'),
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: _goHome,
+              ),
+            ),
+            body: Center(child: Text('Error: $e')),
+          ),
         ),
         data: (activity) {
           if (activity != null && !_loaded) {
@@ -359,250 +381,268 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
   }
 
   Widget _buildScaffold(bool isEditing) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(isEditing ? 'Editar actividad' : 'Nueva actividad'),
-        actions: [
-          if (isEditing)
-            IconButton(
-              icon: const Icon(Icons.delete),
-              tooltip: 'Eliminar',
-              onPressed: _delete,
-            ),
-          if (_saving)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _goHome();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(isEditing ? 'Editar actividad' : 'Nueva actividad'),
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            tooltip: 'Cerrar',
+            onPressed: _goHome,
+          ),
+          actions: [
+            if (isEditing)
+              IconButton(
+                icon: const Icon(Icons.delete),
+                tooltip: 'Eliminar',
+                onPressed: _delete,
               ),
-            )
-          else
-            TextButton(onPressed: _save, child: const Text('Guardar')),
-        ],
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            TextFormField(
-              controller: _titleCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Título *',
-                border: OutlineInputBorder(),
-              ),
-              validator: (v) => v == null || v.trim().isEmpty
-                  ? 'El título es obligatorio'
-                  : null,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _notesCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Notas',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 16),
-            Text('Color', style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: List.generate(activityPalette.length, (i) {
-                final selected = _color == i;
-                return GestureDetector(
-                  onTap: () => setState(() => _color = i),
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: activityPalette[i],
-                      shape: BoxShape.circle,
-                      border: selected
-                          ? Border.all(
-                              color: Theme.of(context).colorScheme.primary,
-                              width: 3,
-                            )
-                          : null,
-                    ),
-                    child: selected
-                        ? const Icon(Icons.check, size: 18, color: Colors.white)
-                        : null,
-                  ),
-                );
-              }),
-            ),
-            const SizedBox(height: 16),
-            SegmentedButton<_EditorMode>(
-              segments: const [
-                ButtonSegment(
-                  value: _EditorMode.single,
-                  label: Text('Puntual'),
-                  icon: Icon(Icons.event),
+            if (_saving)
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 ),
-                ButtonSegment(
-                  value: _EditorMode.recurring,
-                  label: Text('Recurrente'),
-                  icon: Icon(Icons.repeat),
+              )
+            else
+              TextButton(onPressed: _save, child: const Text('Guardar')),
+          ],
+        ),
+        body: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              TextFormField(
+                controller: _titleCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Título *',
+                  border: OutlineInputBorder(),
                 ),
-              ],
-              selected: {_mode},
-              onSelectionChanged: (s) => setState(() => _mode = s.first),
-            ),
-            const SizedBox(height: 16),
-            if (_mode == _EditorMode.single) ...[
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Fecha'),
-                subtitle: Text(
-                  DateFormat('EEEE d MMMM y', 'es').format(_singleDate),
+                validator: (v) => v == null || v.trim().isEmpty
+                    ? 'El título es obligatorio'
+                    : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _notesCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Notas',
+                  border: OutlineInputBorder(),
                 ),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: () => _pickDate(
-                  _singleDate,
-                  (d) => setState(() => _singleDate = d),
-                ),
+                maxLines: 3,
               ),
-              Row(
-                children: [
-                  Expanded(
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Inicio'),
-                      subtitle: Text(_singleStart.format(context)),
-                      onTap: () => _pickTime(
-                        _singleStart,
-                        (t) => setState(() => _singleStart = t),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Fin'),
-                      subtitle: Text(_singleEnd.format(context)),
-                      onTap: () => _pickTime(
-                        _singleEnd,
-                        (t) => setState(() => _singleEnd = t),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ] else ...[
-              Row(
-                children: [
-                  Expanded(
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Inicio'),
-                      subtitle: Text(_recStart.format(context)),
-                      onTap: () => _pickTime(
-                        _recStart,
-                        (t) => setState(() => _recStart = t),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Fin'),
-                      subtitle: Text(_recEnd.format(context)),
-                      onTap: () => _pickTime(
-                        _recEnd,
-                        (t) => setState(() => _recEnd = t),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Días de la semana',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
+              const SizedBox(height: 16),
+              Text('Color', style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
-                children: _weekdayLabels.entries.map((e) {
-                  final selected = _weekdays.contains(e.key);
-                  return FilterChip(
-                    label: Text(e.value),
-                    selected: selected,
-                    onSelected: (v) => setState(() {
-                      if (v) {
-                        _weekdays = {..._weekdays, e.key};
-                      } else {
-                        _weekdays = {..._weekdays}..remove(e.key);
-                      }
-                    }),
+                children: List.generate(activityPalette.length, (i) {
+                  final selected = _color == i;
+                  return GestureDetector(
+                    onTap: () => setState(() => _color = i),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: activityPalette[i],
+                        shape: BoxShape.circle,
+                        border: selected
+                            ? Border.all(
+                                color: Theme.of(context).colorScheme.primary,
+                                width: 3,
+                              )
+                            : null,
+                      ),
+                      child: selected
+                          ? const Icon(
+                              Icons.check,
+                              size: 18,
+                              color: Colors.white,
+                            )
+                          : null,
+                    ),
                   );
-                }).toList(),
+                }),
               ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Fecha de inicio'),
-                subtitle: Text(
-                  DateFormat('EEEE d MMMM y', 'es').format(_firstDate),
-                ),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: () => _pickDate(
-                  _firstDate,
-                  (d) => setState(() => _firstDate = d),
-                ),
+              const SizedBox(height: 16),
+              SegmentedButton<_EditorMode>(
+                segments: const [
+                  ButtonSegment(
+                    value: _EditorMode.single,
+                    label: Text('Puntual'),
+                    icon: Icon(Icons.event),
+                  ),
+                  ButtonSegment(
+                    value: _EditorMode.recurring,
+                    label: Text('Recurrente'),
+                    icon: Icon(Icons.repeat),
+                  ),
+                ],
+                selected: {_mode},
+                onSelectionChanged: (s) => setState(() => _mode = s.first),
               ),
-              const SizedBox(height: 8),
-              Text('Termina', style: Theme.of(context).textTheme.titleSmall),
-              RadioGroup<_EndCondition>(
-                groupValue: _endCondition,
-                onChanged: (v) => setState(() => _endCondition = v!),
-                child: Column(
+              const SizedBox(height: 16),
+              if (_mode == _EditorMode.single) ...[
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Fecha'),
+                  subtitle: Text(
+                    DateFormat('EEEE d MMMM y', 'es').format(_singleDate),
+                  ),
+                  trailing: const Icon(Icons.calendar_today),
+                  onTap: () => _pickDate(
+                    _singleDate,
+                    (d) => setState(() => _singleDate = d),
+                  ),
+                ),
+                Row(
                   children: [
-                    RadioListTile<_EndCondition>(
-                      title: const Text('Nunca'),
-                      value: _EndCondition.never,
-                    ),
-                    RadioListTile<_EndCondition>(
-                      title: const Text('Hasta fecha'),
-                      value: _EndCondition.until,
-                    ),
-                    if (_endCondition == _EndCondition.until)
-                      ListTile(
-                        title: Text(
-                          DateFormat('EEEE d MMMM y', 'es').format(_untilDate),
-                        ),
-                        trailing: const Icon(Icons.calendar_today),
-                        onTap: () => _pickDate(
-                          _untilDate,
-                          (d) => setState(() => _untilDate = d),
+                    Expanded(
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Inicio'),
+                        subtitle: Text(_singleStart.format(context)),
+                        onTap: () => _pickTime(
+                          _singleStart,
+                          (t) => setState(() => _singleStart = t),
                         ),
                       ),
-                    RadioListTile<_EndCondition>(
-                      title: const Text('Después de N veces'),
-                      value: _EndCondition.count,
+                    ),
+                    Expanded(
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Fin'),
+                        subtitle: Text(_singleEnd.format(context)),
+                        onTap: () => _pickTime(
+                          _singleEnd,
+                          (t) => setState(() => _singleEnd = t),
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ),
-              if (_endCondition == _EndCondition.count)
-                TextFormField(
-                  controller: _countCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Número de veces',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                  validator: (v) {
-                    final n = int.tryParse(v ?? '');
-                    if (n == null || n < 1) return 'Debe ser >= 1';
-                    return null;
-                  },
+              ] else ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Inicio'),
+                        subtitle: Text(_recStart.format(context)),
+                        onTap: () => _pickTime(
+                          _recStart,
+                          (t) => setState(() => _recStart = t),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Fin'),
+                        subtitle: Text(_recEnd.format(context)),
+                        onTap: () => _pickTime(
+                          _recEnd,
+                          (t) => setState(() => _recEnd = t),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 8),
+                Text(
+                  'Días de la semana',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: _weekdayLabels.entries.map((e) {
+                    final selected = _weekdays.contains(e.key);
+                    return FilterChip(
+                      label: Text(e.value),
+                      selected: selected,
+                      onSelected: (v) => setState(() {
+                        if (v) {
+                          _weekdays = {..._weekdays, e.key};
+                        } else {
+                          _weekdays = {..._weekdays}..remove(e.key);
+                        }
+                      }),
+                    );
+                  }).toList(),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Fecha de inicio'),
+                  subtitle: Text(
+                    DateFormat('EEEE d MMMM y', 'es').format(_firstDate),
+                  ),
+                  trailing: const Icon(Icons.calendar_today),
+                  onTap: () => _pickDate(
+                    _firstDate,
+                    (d) => setState(() => _firstDate = d),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text('Termina', style: Theme.of(context).textTheme.titleSmall),
+                RadioGroup<_EndCondition>(
+                  groupValue: _endCondition,
+                  onChanged: (v) => setState(() => _endCondition = v!),
+                  child: Column(
+                    children: [
+                      RadioListTile<_EndCondition>(
+                        title: const Text('Nunca'),
+                        value: _EndCondition.never,
+                      ),
+                      RadioListTile<_EndCondition>(
+                        title: const Text('Hasta fecha'),
+                        value: _EndCondition.until,
+                      ),
+                      if (_endCondition == _EndCondition.until)
+                        ListTile(
+                          title: Text(
+                            DateFormat(
+                              'EEEE d MMMM y',
+                              'es',
+                            ).format(_untilDate),
+                          ),
+                          trailing: const Icon(Icons.calendar_today),
+                          onTap: () => _pickDate(
+                            _untilDate,
+                            (d) => setState(() => _untilDate = d),
+                          ),
+                        ),
+                      RadioListTile<_EndCondition>(
+                        title: const Text('Después de N veces'),
+                        value: _EndCondition.count,
+                      ),
+                    ],
+                  ),
+                ),
+                if (_endCondition == _EndCondition.count)
+                  TextFormField(
+                    controller: _countCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Número de veces',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (v) {
+                      final n = int.tryParse(v ?? '');
+                      if (n == null || n < 1) return 'Debe ser >= 1';
+                      return null;
+                    },
+                  ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
