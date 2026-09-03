@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../activities/domain/occurrence.dart';
 import 'activity_block.dart';
 
-class TimeGrid extends StatelessWidget {
+class TimeGrid extends StatefulWidget {
   const TimeGrid({
     super.key,
     required this.date,
@@ -22,91 +22,159 @@ class TimeGrid extends StatelessWidget {
   static const double totalHeight = 24 * hourHeight;
 
   @override
+  State<TimeGrid> createState() => _TimeGridState();
+}
+
+class _TimeGridState extends State<TimeGrid> {
+  late final ScrollController _controller;
+  late final DateTime? _now;
+  late final double? _nowTop;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    if (_isSameDay(widget.date, now)) {
+      _now = now;
+      _nowTop = (now.hour * 60 + now.minute) / 60 * TimeGrid.hourHeight;
+      final offset = (_nowTop! - 120).clamp(0.0, TimeGrid.totalHeight);
+      _controller = ScrollController(initialScrollOffset: offset);
+    } else {
+      _now = null;
+      _nowTop = null;
+      _controller = ScrollController();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return SingleChildScrollView(
+      controller: _controller,
       child: SizedBox(
-        height: totalHeight,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        height: TimeGrid.totalHeight,
+        child: Stack(
           children: [
-            SizedBox(
-              width: gutterWidth,
-              child: Column(
-                children: List.generate(24, (hour) {
-                  return SizedBox(
-                    height: hourHeight,
-                    child: Align(
-                      alignment: Alignment.topRight,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 8, top: 2),
-                        child: Text(
-                          '${hour.toString().padLeft(2, '0')}:00',
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(color: colorScheme.onSurfaceVariant),
-                        ),
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ),
-            Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTapUp: (details) {
-                  final localY = details.localPosition.dy;
-                  final totalMinutes = (localY / hourHeight * 60)
-                      .clamp(0, 1439)
-                      .toInt();
-                  final hour = totalMinutes ~/ 60;
-                  final minute = totalMinutes % 60;
-                  onEmptyTap(hour, minute);
-                },
-                child: Stack(
-                  children: [
-                    Column(
-                      children: List.generate(24, (hour) {
-                        return Container(
-                          height: hourHeight,
-                          decoration: BoxDecoration(
-                            border: Border(
-                              top: BorderSide(
-                                color: colorScheme.outlineVariant.withValues(
-                                  alpha: 0.5,
-                                ),
-                                width: hour == 0 ? 0 : 0.5,
-                              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: TimeGrid.gutterWidth,
+                  child: Column(
+                    children: List.generate(24, (hour) {
+                      return SizedBox(
+                        height: TimeGrid.hourHeight,
+                        child: Align(
+                          alignment: Alignment.topRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8, top: 2),
+                            child: Text(
+                              '${hour.toString().padLeft(2, '0')}:00',
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
                             ),
                           ),
-                        );
-                      }),
-                    ),
-                    ...occurrences.map((occ) {
-                      final startMinutes =
-                          occ.start.hour * 60 + occ.start.minute;
-                      final endMinutes = occ.end.hour * 60 + occ.end.minute;
-                      final top = startMinutes / 60 * hourHeight;
-                      final height =
-                          (endMinutes - startMinutes) / 60 * hourHeight;
-                      return Positioned(
-                        top: top + 1,
-                        left: 4,
-                        right: 8,
-                        height: height.clamp(22, totalHeight),
-                        child: ActivityBlock(
-                          occurrence: occ,
-                          onTap: () => onBlockTap(occ),
                         ),
                       );
                     }),
-                  ],
+                  ),
                 ),
-              ),
+                Expanded(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTapUp: (details) {
+                      final localY = details.localPosition.dy;
+                      final totalMinutes = (localY / TimeGrid.hourHeight * 60)
+                          .clamp(0, 1439)
+                          .toInt();
+                      final hour = totalMinutes ~/ 60;
+                      final minute = totalMinutes % 60;
+                      widget.onEmptyTap(hour, minute);
+                    },
+                    child: Stack(
+                      children: [
+                        Column(
+                          children: List.generate(24, (hour) {
+                            return Container(
+                              height: TimeGrid.hourHeight,
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  top: BorderSide(
+                                    color: colorScheme.outlineVariant
+                                        .withValues(alpha: 0.5),
+                                    width: hour == 0 ? 0 : 0.5,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                        ...widget.occurrences.map((occ) {
+                          final startMinutes =
+                              occ.start.hour * 60 + occ.start.minute;
+                          final endMinutes = occ.end.hour * 60 + occ.end.minute;
+                          final top = startMinutes / 60 * TimeGrid.hourHeight;
+                          final height =
+                              (endMinutes - startMinutes) /
+                              60 *
+                              TimeGrid.hourHeight;
+                          return Positioned(
+                            top: top + 1,
+                            left: 4,
+                            right: 8,
+                            height: height.clamp(22, TimeGrid.totalHeight),
+                            child: ActivityBlock(
+                              occurrence: occ,
+                              onTap: () => widget.onBlockTap(occ),
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
+            if (_now != null && _nowTop != null)
+              _buildNowIndicator(colorScheme),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildNowIndicator(ColorScheme scheme) {
+    return Positioned(
+      top: _nowTop!,
+      left: 0,
+      right: 0,
+      height: 2,
+      child: Row(
+        children: [
+          SizedBox(width: TimeGrid.gutterWidth - 6),
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: scheme.primary,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 2),
+          Expanded(child: Container(height: 2, color: scheme.primary)),
+        ],
+      ),
+    );
+  }
 }
+
+bool _isSameDay(DateTime a, DateTime b) =>
+    a.year == b.year && a.month == b.month && a.day == b.day;

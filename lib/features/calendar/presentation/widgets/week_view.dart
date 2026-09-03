@@ -7,7 +7,7 @@ import '../../../../core/theme/activity_colors.dart';
 import '../../../activities/domain/occurrence.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
 
-class WeekView extends ConsumerWidget {
+class WeekView extends ConsumerStatefulWidget {
   const WeekView({super.key, required this.selectedDate});
 
   final DateTime selectedDate;
@@ -16,14 +16,55 @@ class WeekView extends ConsumerWidget {
   static const double gutterWidth = 48;
   static const double totalHeight = 24 * hourHeight;
 
+  @override
+  ConsumerState<WeekView> createState() => _WeekViewState();
+}
+
+class _WeekViewState extends ConsumerState<WeekView> {
+  late final ScrollController _controller;
+  late final DateTime? _now;
+  late final double? _nowTop;
+  late final int? _todayIndex;
+
   DateTime get monday {
-    final d = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+    final d = DateTime(
+      widget.selectedDate.year,
+      widget.selectedDate.month,
+      widget.selectedDate.day,
+    );
     return DateTime(d.year, d.month, d.day - (d.weekday - 1));
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final occurrences = ref.watch(weekOccurrencesProvider(selectedDate));
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    final m = monday;
+    final sunday = DateTime(m.year, m.month, m.day + 6);
+    final normalizedNow = DateTime(now.year, now.month, now.day);
+    if (!normalizedNow.isBefore(m) && !normalizedNow.isAfter(sunday)) {
+      _now = now;
+      _nowTop = (now.hour * 60 + now.minute) / 60 * WeekView.hourHeight;
+      _todayIndex = normalizedNow.difference(m).inDays;
+      final offset = (_nowTop! - 120).clamp(0.0, WeekView.totalHeight);
+      _controller = ScrollController(initialScrollOffset: offset);
+    } else {
+      _now = null;
+      _nowTop = null;
+      _todayIndex = null;
+      _controller = ScrollController();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final occurrences = ref.watch(weekOccurrencesProvider(widget.selectedDate));
     final weekDays = List.generate(
       7,
       (i) => DateTime(monday.year, monday.month, monday.day + i),
@@ -35,109 +76,164 @@ class WeekView extends ConsumerWidget {
         _WeekHeader(weekDays: weekDays),
         Expanded(
           child: SingleChildScrollView(
+            controller: _controller,
             child: SizedBox(
-              height: totalHeight,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: gutterWidth,
-                    child: Column(
-                      children: List.generate(24, (h) {
-                        return SizedBox(
-                          height: hourHeight,
-                          child: Align(
-                            alignment: Alignment.topRight,
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 6, top: 2),
-                              child: Text(
-                                '${h.toString().padLeft(2, '0')}:00',
-                                style: Theme.of(context).textTheme.labelSmall
-                                    ?.copyWith(
-                                      color: colorScheme.onSurfaceVariant,
-                                      fontSize: 10,
-                                    ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
-                  ...weekDays.map((day) {
-                    final dayOcc = occurrences
-                        .where((o) => _isSameDay(o.date, day))
-                        .toList();
-                    final isToday = _isSameDay(day, DateTime.now());
-                    return Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: isToday
-                              ? colorScheme.primaryContainer.withValues(
-                                  alpha: 0.15,
-                                )
-                              : null,
-                          border: Border(
-                            left: BorderSide(
-                              color: colorScheme.outlineVariant.withValues(
-                                alpha: 0.3,
-                              ),
-                              width: 0.5,
-                            ),
-                          ),
-                        ),
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTapUp: (details) {
-                            final localY = details.localPosition.dy;
-                            final h = (localY / hourHeight)
-                                .clamp(0, 23)
-                                .toInt();
-                            context.go(
-                              '/activity/new?date=${day.toIso8601String()}&hour=$h',
-                            );
-                          },
-                          child: Stack(
-                            children: [
-                              Column(
-                                children: List.generate(24, (h) {
-                                  return Container(
-                                    height: hourHeight,
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                        top: BorderSide(
-                                          color: colorScheme.outlineVariant
-                                              .withValues(alpha: 0.3),
-                                          width: 0.5,
-                                        ),
+              height: WeekView.totalHeight,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final columnWidth = constraints.maxWidth.isFinite
+                      ? (constraints.maxWidth - WeekView.gutterWidth) / 7
+                      : 100.0;
+                  return Stack(
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            width: WeekView.gutterWidth,
+                            child: Column(
+                              children: List.generate(24, (h) {
+                                return SizedBox(
+                                  height: WeekView.hourHeight,
+                                  child: Align(
+                                    alignment: Alignment.topRight,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                        right: 6,
+                                        top: 2,
+                                      ),
+                                      child: Text(
+                                        '${h.toString().padLeft(2, '0')}:00',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
+                                              color:
+                                                  colorScheme.onSurfaceVariant,
+                                              fontSize: 10,
+                                            ),
                                       ),
                                     ),
-                                  );
-                                }),
-                              ),
-                              ...dayOcc.map((occ) {
-                                final startMin =
-                                    occ.start.hour * 60 + occ.start.minute;
-                                final endMin =
-                                    occ.end.hour * 60 + occ.end.minute;
-                                final top = startMin / 60 * hourHeight;
-                                final height =
-                                    (endMin - startMin) / 60 * hourHeight;
-                                return Positioned(
-                                  top: top + 1,
-                                  left: 2,
-                                  right: 2,
-                                  height: height.clamp(18, totalHeight),
-                                  child: _WeekBlock(occurrence: occ),
+                                  ),
                                 );
                               }),
+                            ),
+                          ),
+                          ...weekDays.map((day) {
+                            final dayOcc = occurrences
+                                .where((o) => _isSameDay(o.date, day))
+                                .toList();
+                            final isToday = _isSameDay(day, DateTime.now());
+                            return Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: isToday
+                                      ? colorScheme.primaryContainer.withValues(
+                                          alpha: 0.15,
+                                        )
+                                      : null,
+                                  border: Border(
+                                    left: BorderSide(
+                                      color: colorScheme.outlineVariant
+                                          .withValues(alpha: 0.3),
+                                      width: 0.5,
+                                    ),
+                                  ),
+                                ),
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTapUp: (details) {
+                                    final localY = details.localPosition.dy;
+                                    final h = (localY / WeekView.hourHeight)
+                                        .clamp(0, 23)
+                                        .toInt();
+                                    context.go(
+                                      '/activity/new?date=${day.toIso8601String()}&hour=$h',
+                                    );
+                                  },
+                                  child: Stack(
+                                    children: [
+                                      Column(
+                                        children: List.generate(24, (h) {
+                                          return Container(
+                                            height: WeekView.hourHeight,
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                top: BorderSide(
+                                                  color: colorScheme
+                                                      .outlineVariant
+                                                      .withValues(alpha: 0.3),
+                                                  width: 0.5,
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }),
+                                      ),
+                                      ...dayOcc.map((occ) {
+                                        final startMin =
+                                            occ.start.hour * 60 +
+                                            occ.start.minute;
+                                        final endMin =
+                                            occ.end.hour * 60 + occ.end.minute;
+                                        final top =
+                                            startMin / 60 * WeekView.hourHeight;
+                                        final height =
+                                            (endMin - startMin) /
+                                            60 *
+                                            WeekView.hourHeight;
+                                        return Positioned(
+                                          top: top + 1,
+                                          left: 2,
+                                          right: 2,
+                                          height: height.clamp(
+                                            18,
+                                            WeekView.totalHeight,
+                                          ),
+                                          child: _WeekBlock(occurrence: occ),
+                                        );
+                                      }),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                      if (_now != null &&
+                          _nowTop != null &&
+                          _todayIndex != null)
+                        Positioned(
+                          // ignore: unnecessary_non_null_assertion
+                          top: _nowTop!,
+                          // ignore: unnecessary_non_null_assertion
+                          left: WeekView.gutterWidth + _todayIndex! * columnWidth,
+                          width: columnWidth,
+                          height: 2,
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: colorScheme.primary,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 2),
+                              Expanded(
+                                child: Container(
+                                  height: 2,
+                                  color: colorScheme.primary,
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                      ),
-                    );
-                  }),
-                ],
+                    ],
+                  );
+                },
               ),
             ),
           ),
