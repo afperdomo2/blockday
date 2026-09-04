@@ -1,0 +1,349 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../domain/task.dart';
+import '../../providers/tasks_providers.dart';
+import '../widgets/task_tile.dart';
+
+class BacklogScreen extends ConsumerStatefulWidget {
+  const BacklogScreen({super.key});
+
+  @override
+  ConsumerState<BacklogScreen> createState() => _BacklogScreenState();
+}
+
+class _BacklogScreenState extends ConsumerState<BacklogScreen> {
+  final _searchCtrl = TextEditingController();
+  final _searchFocus = FocusNode();
+  String _searchQuery = '';
+  bool _searching = false;
+  String _statusFilter = 'all';
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    _searchFocus.dispose();
+    super.dispose();
+  }
+
+  void _startSearch() {
+    setState(() => _searching = true);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _searchFocus.requestFocus(),
+    );
+  }
+
+  void _stopSearch() {
+    setState(() {
+      _searching = false;
+      _searchQuery = '';
+      _searchCtrl.clear();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tasksAsync = ref.watch(tasksStreamProvider);
+    return Scaffold(
+      appBar: AppBar(
+        title: _searching
+            ? TextField(
+                controller: _searchCtrl,
+                focusNode: _searchFocus,
+                decoration: const InputDecoration(
+                  hintText: 'Buscar tareas...',
+                  border: InputBorder.none,
+                  isDense: true,
+                ),
+                onChanged: (v) => setState(() => _searchQuery = v.trim()),
+                onSubmitted: (_) {},
+              )
+            : const Text('Backlog'),
+        centerTitle: false,
+        actions: [
+          if (_searching)
+            IconButton(
+              icon: const Icon(Icons.close),
+              tooltip: 'Cerrar búsqueda',
+              onPressed: _stopSearch,
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.search),
+              tooltip: 'Buscar',
+              onPressed: _startSearch,
+            ),
+        ],
+      ),
+      body: tasksAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('Error: $e')),
+        data: (tasks) {
+          if (tasks.isEmpty) {
+            return Column(
+              children: [
+                _buildStatusFilter(context),
+                const Expanded(
+                  child: Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Text(
+                        'Sin tareas aún.\nCrea una con el botón + y luego prográmala en el calendario.',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }
+
+          final filtered = _applyFilter(tasks);
+
+          return Column(
+            children: [
+              _buildStatusFilter(context),
+              Expanded(
+                child: filtered.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Text(
+                            _searchQuery.isEmpty
+                                ? 'Sin tareas'
+                                : 'Sin resultados para "$_searchQuery"',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                          ),
+                        ),
+                      )
+                    : ListView(
+                        padding: const EdgeInsets.only(bottom: 80),
+                        children: [
+                          if (_statusFilter == 'all' && _searchQuery.isEmpty)
+                            ..._buildAllSections(filtered)
+                          else
+                            _Section(
+                              title: _sectionTitleForFilter(),
+                              count: filtered.length,
+                              tasks: filtered,
+                              emptyText: 'Sin tareas',
+                            ),
+                        ],
+                      ),
+              ),
+            ],
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.go('/backlog/task/new'),
+        icon: const Icon(Icons.add),
+        label: const Text('Nueva tarea'),
+      ),
+    );
+  }
+
+  List<Widget> _buildAllSections(List<Task> filtered) {
+    final byStatus = <TaskStatus, List<Task>>{
+      TaskStatus.pending: [],
+      TaskStatus.scheduled: [],
+      TaskStatus.inProgress: [],
+      TaskStatus.completed: [],
+    };
+    for (final t in filtered) {
+      final s = ref.read(taskStatusProvider(t.id));
+      byStatus[s]!.add(t);
+    }
+    return [
+      _Section(
+        title: 'Sin programar',
+        count: byStatus[TaskStatus.pending]!.length,
+        tasks: byStatus[TaskStatus.pending]!,
+        emptyText: 'Nada sin programar',
+      ),
+      _Section(
+        title: 'Programadas',
+        count: byStatus[TaskStatus.scheduled]!.length,
+        tasks: byStatus[TaskStatus.scheduled]!,
+        emptyText: 'Nada programado',
+      ),
+      _Section(
+        title: 'En progreso',
+        count: byStatus[TaskStatus.inProgress]!.length,
+        tasks: byStatus[TaskStatus.inProgress]!,
+        emptyText: 'Nada en progreso',
+      ),
+      _Section(
+        title: 'Hechas',
+        count: byStatus[TaskStatus.completed]!.length,
+        tasks: byStatus[TaskStatus.completed]!,
+        emptyText: 'Nada hecho aún',
+      ),
+    ];
+  }
+
+  String _sectionTitleForFilter() {
+    switch (_statusFilter) {
+      case 'pending':
+        return 'Sin programar';
+      case 'scheduled':
+        return 'Programadas';
+      case 'inProgress':
+        return 'En progreso';
+      case 'completed':
+        return 'Hechas';
+      default:
+        if (_searchQuery.isNotEmpty) return 'Resultados';
+        return 'Tareas';
+    }
+  }
+
+  Widget _buildStatusFilter(BuildContext context) {
+    const filters = [
+      ('all', 'Todas'),
+      ('pending', 'Sin programar'),
+      ('scheduled', 'Programadas'),
+      ('inProgress', 'En progreso'),
+      ('completed', 'Hechas'),
+    ];
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Row(
+        children: filters.map((f) {
+          final selected = _statusFilter == f.$1;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: FilterChip(
+              label: Text(f.$2),
+              selected: selected,
+              onSelected: (_) => setState(() => _statusFilter = f.$1),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  List<Task> _applyFilter(List<Task> tasks) {
+    var result = tasks;
+
+    if (_searchQuery.isNotEmpty) {
+      final q = _searchQuery.toLowerCase();
+      result = result
+          .where(
+            (t) =>
+                t.title.toLowerCase().contains(q) ||
+                (t.notes?.toLowerCase().contains(q) ?? false),
+          )
+          .toList();
+    }
+
+    switch (_statusFilter) {
+      case 'pending':
+        result = result
+            .where(
+              (t) => ref.read(taskStatusProvider(t.id)) == TaskStatus.pending,
+            )
+            .toList();
+        break;
+      case 'scheduled':
+        result = result
+            .where(
+              (t) => ref.read(taskStatusProvider(t.id)) == TaskStatus.scheduled,
+            )
+            .toList();
+        break;
+      case 'inProgress':
+        result = result
+            .where(
+              (t) =>
+                  ref.read(taskStatusProvider(t.id)) == TaskStatus.inProgress,
+            )
+            .toList();
+        break;
+      case 'completed':
+        result = result
+            .where(
+              (t) => ref.read(taskStatusProvider(t.id)) == TaskStatus.completed,
+            )
+            .toList();
+        break;
+      default:
+        break;
+    }
+
+    return result;
+  }
+}
+
+class _Section extends StatelessWidget {
+  const _Section({
+    required this.title,
+    required this.count,
+    required this.tasks,
+    required this.emptyText,
+  });
+
+  final String title;
+  final int count;
+  final List<Task> tasks;
+  final String emptyText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          child: Row(
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '$count',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (tasks.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              emptyText,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          )
+        else
+          ...tasks.map(
+            (t) => TaskTile(
+              task: t,
+              onTap: () => GoRouter.of(context).go('/backlog/task/${t.id}'),
+            ),
+          ),
+      ],
+    );
+  }
+}

@@ -1,6 +1,8 @@
 import 'package:blockday/features/activities/domain/occurrence.dart';
+import 'package:blockday/features/backlog/providers/tasks_providers.dart';
 import 'package:blockday/features/calendar/presentation/widgets/time_grid.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -30,13 +32,18 @@ void main() {
     ];
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: TimeGrid(
-            date: DateTime(2025, 1, 6),
-            occurrences: occurrences,
-            onEmptyTap: (_, _) {},
-            onBlockTap: (_) {},
+      ProviderScope(
+        overrides: [
+          sessionsStreamProvider.overrideWith((ref) => Stream.value([])),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: TimeGrid(
+              date: DateTime(2025, 1, 6),
+              occurrences: occurrences,
+              onEmptyTap: (_, _) {},
+              onBlockTap: (_) {},
+            ),
           ),
         ),
       ),
@@ -51,13 +58,18 @@ void main() {
 
   testWidgets('empty grid shows no blocks', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: TimeGrid(
-            date: DateTime(2025, 1, 6),
-            occurrences: const [],
-            onEmptyTap: (_, _) {},
-            onBlockTap: (_) {},
+      ProviderScope(
+        overrides: [
+          sessionsStreamProvider.overrideWith((ref) => Stream.value([])),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: TimeGrid(
+              date: DateTime(2025, 1, 6),
+              occurrences: const [],
+              onEmptyTap: (_, _) {},
+              onBlockTap: (_) {},
+            ),
           ),
         ),
       ),
@@ -77,13 +89,18 @@ void main() {
       end: DateTime(2025, 1, 6, 3, 0),
     );
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: TimeGrid(
-            date: DateTime(2025, 1, 6),
-            occurrences: [occ],
-            onEmptyTap: (_, _) {},
-            onBlockTap: (o) => tappedId = o.activityId,
+      ProviderScope(
+        overrides: [
+          sessionsStreamProvider.overrideWith((ref) => Stream.value([])),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: TimeGrid(
+              date: DateTime(2025, 1, 6),
+              occurrences: [occ],
+              onEmptyTap: (_, _) {},
+              onBlockTap: (o) => tappedId = o.activityId,
+            ),
           ),
         ),
       ),

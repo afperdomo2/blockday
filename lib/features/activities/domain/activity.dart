@@ -15,6 +15,7 @@ class Activity {
     this.singleEnd,
     this.rule,
     Set<DateTime>? excludedDates,
+    this.taskId,
   }) : excludedDates = excludedDates == null
            ? const {}
            : Set.unmodifiable(
@@ -61,6 +62,7 @@ class Activity {
   final DateTime? singleEnd;
   final RecurrenceRule? rule;
   final Set<DateTime> excludedDates;
+  final String? taskId;
 
   Activity copyWith({
     String? id,
@@ -72,7 +74,9 @@ class Activity {
     DateTime? singleEnd,
     RecurrenceRule? rule,
     Set<DateTime>? excludedDates,
+    String? taskId,
     bool clearNotes = false,
+    bool clearTaskId = false,
   }) {
     return Activity(
       id: id ?? this.id,
@@ -84,6 +88,7 @@ class Activity {
       singleEnd: singleEnd ?? this.singleEnd,
       rule: rule ?? this.rule,
       excludedDates: excludedDates ?? this.excludedDates,
+      taskId: clearTaskId ? null : (taskId ?? this.taskId),
     );
   }
 
@@ -114,6 +119,7 @@ class Activity {
           date: singleDate,
           start: singleStart!,
           end: singleEnd!,
+          taskId: taskId,
         ),
       ];
     }
@@ -177,6 +183,7 @@ class Activity {
                 r.endMinutes ~/ 60,
                 r.endMinutes % 60,
               ),
+              taskId: taskId,
             ),
           );
         }
@@ -198,7 +205,8 @@ class Activity {
       singleStart == other.singleStart &&
       singleEnd == other.singleEnd &&
       rule == other.rule &&
-      _setEquals(excludedDates, other.excludedDates);
+      _setEquals(excludedDates, other.excludedDates) &&
+      taskId == other.taskId;
 
   @override
   int get hashCode => Object.hash(
@@ -211,10 +219,11 @@ class Activity {
     singleEnd,
     rule,
     excludedDates.length,
+    taskId,
   );
 
   @override
-  String toString() => 'Activity($id, $title, $kind)';
+  String toString() => 'Activity($id, $title, $kind, task:$taskId)';
 }
 
 bool _isSameDay(DateTime a, DateTime b) =>

@@ -29,18 +29,33 @@ lib/
 │   │   ├── data/       # tablas Drift, DAO, repositorio
 │   │   ├── presentation/  # editor de actividad, selector de repetición
 │   │   └── providers/
+│   ├── backlog/
+│   │   ├── domain/     # Task, TaskKind, TaskStatus, TaskProgress
+│   │   ├── data/       # mappers, TasksRepository, SessionsRepository
+│   │   ├── presentation/  # BacklogScreen, TaskEditor, TaskTile
+│   │   └── providers/  # tasks/sessions/progress providers
 │   └── calendar/
 │       ├── presentation/  # shell, vista día/semana/mes, time-grid
 │       └── providers/     # fecha seleccionada, vista actual, ocurrencias por rango
 ├── shared/
 │   └── widgets/        # widgets reutilizables
 └── routes/
-    └── app_router.dart
+    ├── app_router.dart     # StatefulShellRoute (calendario/backlog)
+    └── main_shell.dart     # NavigationBar
 ```
 
 ## Modelo de dominio
 
 ```
+Task (backlog, inmutable)
+├── id: String (uuid)
+├── title: String
+├── notes: String?               # texto plano, futuro markdown
+├── kind: TaskKind               # task | learning | note | project
+├── status: TaskStatus           # pending | scheduled | inProgress | completed
+├── estimatedMinutes: int?       # estimación total en minutos
+└── createdAt: DateTime
+
 Activity (inmutable)
 ├── id: String (uuid)
 ├── title: String
@@ -48,13 +63,22 @@ Activity (inmutable)
 ├── color: int              # índice de la paleta
 ├── kind: ActivityKind      # single | recurring
 ├── singleStart/singleEnd: DateTime?   # solo si kind == single
-└── rule: RecurrenceRule?              # solo si kind == recurring
-      ├── startTime/endTime: minutos desde medianoche (start < end, mismo día)
-      ├── weekdays: Set<DateTime.monday..sunday>
-      ├── firstDate: DateTime (solo fecha)
-      └── end: RecurrenceEnd  # never | until(date) | count(n)
+├── rule: RecurrenceRule?              # solo si kind == recurring
+│     ├── startTime/endTime: minutos desde medianoche (start < end, mismo día)
+│     ├── weekdays: Set<DateTime.monday..sunday>
+│     ├── firstDate: DateTime (solo fecha)
+│     └── end: RecurrenceEnd  # never | until(date) | count(n)
+├── excludedDates: Set<DateTime>  # ocurrencias saltadas (solo fecha)
+└── taskId: String?               # FK opcional → tasks.id ON DELETE SET NULL
 
-excludedDates: Set<DateTime>  # ocurrencias saltadas (solo fecha)
+Occurrence { activityId, title, color, date, start, end, taskId? }
+→ taskId se propaga desde Activity para badge y progreso
+
+TaskProgress (derivado)
+├── totalPlannedSessions, completedSessions, remainingSessions
+├── totalPlannedMinutes, totalActualMinutes
+├── linkedActivitiesCount, hasFutureOccurrence, completionRatio
+└── isUnscheduled (linkedCount == 0)
 ```
 
 Restricciones (validadas en dominio):
@@ -87,6 +111,15 @@ para fechas de calendario).
 ## Persistencia (Drift)
 
 ```
+tasks
+├── id TEXT PK
+├── title TEXT NOT NULL
+├── notes TEXT
+├── kind TEXT NOT NULL ('task'|'learning'|'note'|'project')
+├── status TEXT NOT NULL ('pending'|'scheduled'|'inProgress'|'completed')
+├── estimated_minutes INTEGER?
+└── created_at INTEGER NOT NULL (epoch ms)
+
 activities
 ├── id TEXT PK
 ├── title TEXT NOT NULL
@@ -100,12 +133,23 @@ activities
 ├── start_minutes INTEGER?
 ├── end_minutes INTEGER?
 ├── end_type TEXT?           # 'never'|'until'|'count'
-└── end_value INTEGER?       # epoch ms o N
+├── end_value INTEGER?       # epoch ms o N
+└── task_id TEXT NULL REFERENCES tasks(id) ON DELETE SET NULL
 
 activity_exclusions
 ├── activity_id TEXT FK → activities.id ON DELETE CASCADE
 └── excluded_date INTEGER NOT NULL  # epoch ms normalizado a 00:00 local
     PK (activity_id, excluded_date)
+
+activity_sessions
+├── activity_id TEXT FK → activities.id ON DELETE CASCADE
+├── date INTEGER NOT NULL  # epoch ms normalizado a 00:00 local
+├── completed_at INTEGER?  # epoch ms, null = no completada
+└── actual_minutes INTEGER?
+    PK (activity_id, date)
+
+Migración 1→2: create tasks + activity_sessions, addColumn activities.taskId, PRAGMA foreign_keys=ON.
+SchemaVersion 2.
 ```
 
 Repositorio (`ActivitiesRepository`): CRUD + query de activities +
@@ -114,18 +158,25 @@ Tests con `NativeDatabase.memory()` / executor en memoria.
 
 ## Estado (Riverpod)
 
-- `databaseProvider` → AppDatabase (singleton).
+- `appDatabaseProvider` → AppDatabase (singleton).
 - `activitiesRepositoryProvider` → repositorio.
-- `activitiesProvider` → stream/lista de actividades.
+- `tasksRepositoryProvider` / `sessionsRepositoryProvider`
+- `activitiesStreamProvider` → stream/lista de actividades.
+- `tasksStreamProvider` / `taskByIdProvider` / `sessionsStreamProvider`
+- `taskProgressProvider(taskId)` → TaskProgress derivado
 - `calendarStateProvider` → `CalendarState{ selectedDate, view (día/semana/mes) }`.
 - `occurrencesProvider(rangeStart, rangeEnd)` → ocurrencias expandidas para el
   rango visible (family provider).
 
 ## Navegación
 
-- `/` → calendario (shell con vistas día/semana/mes).
-- `/activity/new?date=...` → editor de actividad nueva.
-- `/activity/:id` → editar actividad existente.
+- Shell `StatefulShellRoute.indexedStack` con `MainShell` (NavigationBar: Calendario / Backlog)
+  - `/` → calendario (vistas día/semana/mes)
+  - `/backlog` → BacklogScreen (captura rápida + filtros + secciones)
+  - `/backlog/task/new` → nueva tarea
+  - `/backlog/task/:id` → editar tarea
+- `/activity/new?date=...&hour=...&taskId=...` → editor de actividad (prefill + vínculo)
+- `/activity/:id` → editar actividad existente (con selector de tarea vinculada)
 
 ## Estrategia de tests
 

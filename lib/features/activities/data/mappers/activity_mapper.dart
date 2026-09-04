@@ -37,6 +37,7 @@ db.ActivitiesCompanion toCompanion(domain.Activity activity) {
       endMinutes: const Value.absent(),
       endType: const Value.absent(),
       endValue: const Value.absent(),
+      taskId: Value(activity.taskId),
     );
   }
   final rule = activity.rule!;
@@ -71,6 +72,7 @@ db.ActivitiesCompanion toCompanion(domain.Activity activity) {
     endMinutes: Value(rule.endMinutes),
     endType: Value(endType),
     endValue: Value(endValue),
+    taskId: Value(activity.taskId),
   );
 }
 
@@ -94,6 +96,7 @@ domain.Activity fromRow(
       singleStart: DateTime.fromMillisecondsSinceEpoch(row.singleStart!),
       singleEnd: DateTime.fromMillisecondsSinceEpoch(row.singleEnd!),
       excludedDates: excludedDates,
+      taskId: row.taskId,
     );
   }
 
@@ -125,5 +128,6 @@ domain.Activity fromRow(
       end: end,
     ),
     excludedDates: excludedDates,
+    taskId: row.taskId,
   );
 }

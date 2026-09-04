@@ -66,9 +66,51 @@ en verde (ver AGENTS.md).
 - [x] Dark mode pulido
 - [x] Vacíos de UI (empty states) y errores de formulario
 
+## Hito 9 — Backlog: dominio y persistencia Task
+
+- [x] Modelos `Task`, `TaskKind` (task|learning|note|project), `TaskStatus` (pending|scheduled|inProgress|completed), `TaskProgress`
+- [x] Validaciones de dominio (título, estimación >0)
+- [x] Tablas Drift `tasks` + `activity_sessions`, columna `activities.task_id` (FK `ON DELETE SET NULL`)
+- [x] Migración schemaVersion 1→2 con `MigrationStrategy` (create tasks/sessions + addColumn taskId)
+- [x] Mappers `task_mapper.dart` + repos `TasksRepository`, `SessionsRepository`
+- [x] `Activity.taskId` y `Occurrence.taskId` + mappers actualizados
+
+## Hito 10 — Providers y progreso
+
+- [x] `tasksStreamProvider`, `taskByIdProvider`, `sessionsStreamProvider`, `taskProgressProvider`, `isTaskScheduledProvider`
+- [x] `TaskProgress` (sesiones planeadas vs completadas, horas planificadas vs reales)
+
+## Hito 11 — Backlog UI + Shell con bottom nav
+
+- [x] `MainShell` con `NavigationBar` (Calendario / Backlog) vía `StatefulShellRoute.indexedStack`
+- [x] `BacklogScreen`: captura rápida (inbox), resumen semanal, filtros (Todas/Sin programar/Programadas/En progreso/Hechas), secciones agrupadas
+- [x] `TaskTile` con badge de vínculo, progreso `3 de 8`, horas y `LinearProgressIndicator`
+- [x] `TaskEditorScreen` (crear/editar: título, notas texto plano -markdown futuro-, tipo, estado, estimación horas, sección de bloques vinculados)
+
+## Hito 12 — Flujo Programar en calendario
+
+- [x] Desde tarea → `Programar` abre `/activity/new?taskId=…` prellenado (título/notas) y vinculado
+- [x] Editor de actividad con `_TaskLinkTile` (vincular/cambiar/sin vincular tarea)
+- [x] Badge `Icons.link` en `ActivityBlock` (día) y `_WeekBlock` (semana) cuando `occurrence.isLinkedToTask`
+
+## Hito 13 — Sesiones completadas y progreso
+
+- [x] `SessionsRepository` (mark/unmark/toggle/isCompleted) sobre `activity_sessions`
+- [x] Long-press en `ActivityBlock` hace toggle de sesión completada (con `actualMinutes`)
+- [x] `taskProgressProvider` agrega sesiones completadas y horas reales
+
+## Hito 14 — Pulido
+
+- [x] Resumen semanal en Backlog (`Total: X/Y sesiones`)
+- [x] Empty states y filtros en Backlog
+- [x] Corrección de `time_grid_test.dart` para `ProviderScope` + `sessionsStreamProvider`
+- [ ] Tags de tareas (deferido)
+- [ ] Markdown en notas (campo `notes` ya preparado, render deferido)
+- [ ] Animaciones avanzadas según `apple-design` para Backlog (staggered list)
+
 ## Fase 2 (fuera de v1)
 
 - [ ] Recordatorios con `flutter_local_notifications` (timezone, permisos
       Android, canal de notificaciones Windows)
-- [ ] Búsqueda de actividades
+- [ ] Búsqueda de actividades/tareas
 - [ ] Exportar/importar datos

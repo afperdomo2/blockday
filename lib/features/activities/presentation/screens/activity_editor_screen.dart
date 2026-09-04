@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/theme/activity_colors.dart';
+import '../../../backlog/providers/tasks_providers.dart';
 import '../../domain/activity.dart';
 import '../../domain/recurrence_end.dart';
 import '../../domain/recurrence_rule.dart';
@@ -52,8 +53,10 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
   _EndCondition _endCondition = _EndCondition.never;
   DateTime _untilDate = DateTime.now().add(const Duration(days: 30));
   Set<DateTime> _excludedDates = {};
+  String? _taskId;
   bool _loaded = false;
   bool _saving = false;
+  bool _taskPrefilled = false;
 
   @override
   void initState() {
@@ -66,6 +69,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
     final state = GoRouterState.of(context);
     final dateStr = state.uri.queryParameters['date'];
     final hourStr = state.uri.queryParameters['hour'];
+    final taskIdParam = state.uri.queryParameters['taskId'];
     if (dateStr != null) {
       final parsed = DateTime.tryParse(dateStr);
       if (parsed != null) {
@@ -86,6 +90,47 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
         });
       }
     }
+    if (taskIdParam != null && !_taskPrefilled) {
+      _taskId = taskIdParam;
+      _prefillFromTask(taskIdParam);
+    }
+  }
+
+  Future<void> _prefillFromTask(String taskId) async {
+    final task = await ref.read(tasksRepositoryProvider).getById(taskId);
+    if (task == null || !mounted || _taskPrefilled) return;
+    setState(() {
+      _taskPrefilled = true;
+      _titleCtrl.text = task.title;
+      if (task.notes != null) _notesCtrl.text = task.notes!;
+    });
+  }
+
+  Future<void> _pickTask() async {
+    final tasks = await ref.read(tasksRepositoryProvider).getAll();
+    if (!mounted) return;
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: const Text('Vincular tarea'),
+        children: [
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(ctx, ''),
+            child: const Text('Sin vincular'),
+          ),
+          const Divider(),
+          ...tasks.map(
+            (t) => SimpleDialogOption(
+              onPressed: () => Navigator.pop(ctx, t.id),
+              child: Text(t.title),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (selected != null) {
+      setState(() => _taskId = selected.isEmpty ? null : selected);
+    }
   }
 
   void _populateFromActivity(Activity a) {
@@ -93,6 +138,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
     _notesCtrl.text = a.notes ?? '';
     _color = a.color;
     _excludedDates = a.excludedDates;
+    _taskId = a.taskId;
     if (a.kind == ActivityKind.single) {
       _mode = _EditorMode.single;
       _singleDate = DateTime(
@@ -219,8 +265,25 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
       }
     }
 
-    setState(() => _saving = true);
     final id = widget.activityId ?? const Uuid().v4();
+    if (_taskId != null) {
+      final all = await ref.read(activitiesRepositoryProvider).getAll();
+      final alreadyLinked = all.any((a) => a.taskId == _taskId && a.id != id);
+      if (alreadyLinked) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Esta tarea ya tiene un bloque vinculado. Usa "Ver programación" para editarlo.',
+              ),
+            ),
+          );
+        }
+        return;
+      }
+    }
+
+    setState(() => _saving = true);
     final title = _titleCtrl.text.trim();
     final notes = _notesCtrl.text.trim().isEmpty
         ? null
@@ -250,6 +313,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
         singleStart: start,
         singleEnd: end,
         excludedDates: _excludedDates,
+        taskId: _taskId,
       );
     } else {
       RecurrenceEnd end;
@@ -274,6 +338,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
           end: end,
         ),
         excludedDates: _excludedDates,
+        taskId: _taskId,
       );
     }
 
@@ -471,6 +536,12 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
                   );
                 }),
               ),
+              const SizedBox(height: 12),
+              _TaskLinkTile(
+                taskId: _taskId,
+                onPick: _pickTask,
+                onClear: () => setState(() => _taskId = null),
+              ),
               const SizedBox(height: 16),
               SegmentedButton<_EditorMode>(
                 segments: const [
@@ -641,6 +712,66 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
                     },
                   ),
               ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TaskLinkTile extends ConsumerWidget {
+  const _TaskLinkTile({
+    required this.taskId,
+    required this.onPick,
+    required this.onClear,
+  });
+
+  final String? taskId;
+  final VoidCallback onPick;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (taskId == null) {
+      return Card(
+        child: ListTile(
+          leading: const Icon(Icons.link_off),
+          title: const Text('Sin tarea vinculada'),
+          subtitle: const Text(
+            'Vincula esta actividad a una tarea del backlog',
+          ),
+          trailing: FilledButton.tonal(
+            onPressed: onPick,
+            child: const Text('Vincular'),
+          ),
+        ),
+      );
+    }
+    final asyncTask = ref.watch(taskByIdProvider(taskId!));
+    return asyncTask.when(
+      loading: () =>
+          const Card(child: ListTile(title: Text('Cargando tarea...'))),
+      error: (_, _) => Card(
+        child: ListTile(
+          leading: const Icon(Icons.link),
+          title: Text('Tarea $taskId'),
+          trailing: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: onClear,
+          ),
+        ),
+      ),
+      data: (task) => Card(
+        child: ListTile(
+          leading: const Icon(Icons.link),
+          title: Text(task?.title ?? 'Tarea $taskId'),
+          subtitle: task != null ? Text(task.kind.name) : null,
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextButton(onPressed: onPick, child: const Text('Cambiar')),
+              IconButton(icon: const Icon(Icons.close), onPressed: onClear),
             ],
           ),
         ),

@@ -6,6 +6,7 @@ class Occurrence {
     required this.date,
     required this.start,
     required this.end,
+    this.taskId,
   });
 
   final String activityId;
@@ -14,6 +15,9 @@ class Occurrence {
   final DateTime date;
   final DateTime start;
   final DateTime end;
+  final String? taskId;
+
+  bool get isLinkedToTask => taskId != null;
 
   @override
   bool operator ==(Object other) =>
@@ -23,11 +27,12 @@ class Occurrence {
       color == other.color &&
       date == other.date &&
       start == other.start &&
-      end == other.end;
+      end == other.end &&
+      taskId == other.taskId;
 
   @override
-  int get hashCode => Object.hash(activityId, date, start, end);
+  int get hashCode => Object.hash(activityId, date, start, end, taskId);
 
   @override
-  String toString() => 'Occurrence($activityId $date $start-$end)';
+  String toString() => 'Occurrence($activityId $date $start-$end task:$taskId)';
 }

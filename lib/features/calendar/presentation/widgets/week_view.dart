@@ -1,3 +1,4 @@
+// ignore_for_file: unnecessary_non_null_assertion
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -205,10 +206,9 @@ class _WeekViewState extends ConsumerState<WeekView> {
                           _nowTop != null &&
                           _todayIndex != null)
                         Positioned(
-                          // ignore: unnecessary_non_null_assertion
                           top: _nowTop!,
-                          // ignore: unnecessary_non_null_assertion
-                          left: WeekView.gutterWidth + _todayIndex! * columnWidth,
+                          left:
+                              WeekView.gutterWidth + _todayIndex! * columnWidth,
                           width: columnWidth,
                           height: 2,
                           child: Row(
@@ -307,6 +307,7 @@ class _WeekBlock extends StatelessWidget {
     final fg = ThemeData.estimateBrightnessForColor(bg) == Brightness.dark
         ? Colors.white
         : Colors.black87;
+    final isLinked = occurrence.isLinkedToTask;
     return GestureDetector(
       onTap: () => context.go('/activity/${occurrence.activityId}'),
       child: Container(
@@ -315,15 +316,25 @@ class _WeekBlock extends StatelessWidget {
           borderRadius: BorderRadius.circular(6),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-        child: Text(
-          occurrence.title,
-          style: TextStyle(
-            color: fg,
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-          ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                occurrence.title,
+                style: TextStyle(
+                  color: fg,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (isLinked) ...[
+              const SizedBox(width: 2),
+              Icon(Icons.link, size: 10, color: fg.withValues(alpha: 0.9)),
+            ],
+          ],
         ),
       ),
     );
