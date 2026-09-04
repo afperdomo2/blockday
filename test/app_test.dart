@@ -16,7 +16,7 @@ void main() {
     appRouter.go('/');
   });
 
-  testWidgets('shows calendar home screen', (tester) async {
+  testWidgets('shows home screen', (tester) async {
     final db = AppDatabase.memory();
     addTearDown(db.close);
     await tester.pumpWidget(
@@ -28,6 +28,26 @@ void main() {
         child: const BlockdayApp(),
       ),
     );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Inicio'), findsWidgets);
+  });
+
+  testWidgets('shows calendar screen at /calendar', (tester) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          activitiesStreamProvider.overrideWith((ref) => Stream.value([])),
+        ],
+        child: const BlockdayApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    appRouter.go('/calendar');
     await tester.pumpAndSettle();
 
     expect(find.text('Blockday'), findsOneWidget);

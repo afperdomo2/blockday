@@ -168,6 +168,7 @@ class CalendarScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'calendar-fab',
         onPressed: () =>
             context.go('/activity/new?date=${selectedDate.toIso8601String()}'),
         icon: const Icon(Icons.add),

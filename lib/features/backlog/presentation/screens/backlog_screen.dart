@@ -143,6 +143,7 @@ class _BacklogScreenState extends ConsumerState<BacklogScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'backlog-fab',
         onPressed: () => context.go('/backlog/task/new'),
         icon: const Icon(Icons.add),
         label: const Text('Nueva tarea'),

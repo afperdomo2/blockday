@@ -4,6 +4,7 @@ import '../features/activities/presentation/screens/activity_editor_screen.dart'
 import '../features/backlog/presentation/screens/backlog_screen.dart';
 import '../features/backlog/presentation/screens/task_editor_screen.dart';
 import '../features/calendar/presentation/screens/calendar_screen.dart';
+import '../features/home/presentation/screens/home_screen.dart';
 import 'main_shell.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -15,8 +16,13 @@ final GoRouter appRouter = GoRouter(
       branches: [
         StatefulShellBranch(
           routes: [
+            GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
             GoRoute(
-              path: '/',
+              path: '/calendar',
               builder: (context, state) => const CalendarScreen(),
             ),
           ],
