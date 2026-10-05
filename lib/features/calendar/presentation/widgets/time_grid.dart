@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../activities/domain/occurrence.dart';
+import '../../../activities/domain/overlap_layout.dart';
 import 'activity_block.dart';
 
 class TimeGrid extends StatefulWidget {
@@ -117,26 +118,46 @@ class _TimeGridState extends State<TimeGrid> {
                             );
                           }),
                         ),
-                        ...widget.occurrences.map((occ) {
-                          final startMinutes =
-                              occ.start.hour * 60 + occ.start.minute;
-                          final endMinutes = occ.end.hour * 60 + occ.end.minute;
-                          final top = startMinutes / 60 * TimeGrid.hourHeight;
-                          final height =
-                              (endMinutes - startMinutes) /
-                              60 *
-                              TimeGrid.hourHeight;
-                          return Positioned(
-                            top: top + 1,
-                            left: 4,
-                            right: 8,
-                            height: height.clamp(22, TimeGrid.totalHeight),
-                            child: ActivityBlock(
-                              occurrence: occ,
-                              onTap: () => widget.onBlockTap(occ),
-                            ),
-                          );
-                        }),
+                        Positioned.fill(
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              const gutter = 12.0;
+                              final available = (constraints.maxWidth - gutter)
+                                  .clamp(0.0, double.infinity);
+                              final laid = layoutOverlaps(widget.occurrences);
+                              return Stack(
+                                children: laid.map((item) {
+                                  final occ = item.occurrence;
+                                  final columnWidth =
+                                      available / item.totalColumns;
+                                  final startMinutes =
+                                      occ.start.hour * 60 + occ.start.minute;
+                                  final endMinutes =
+                                      occ.end.hour * 60 + occ.end.minute;
+                                  final top =
+                                      startMinutes / 60 * TimeGrid.hourHeight;
+                                  final height =
+                                      (endMinutes - startMinutes) /
+                                      60 *
+                                      TimeGrid.hourHeight;
+                                  return Positioned(
+                                    top: top + 1,
+                                    left: 4 + columnWidth * item.column,
+                                    width: columnWidth - 3,
+                                    height: height.clamp(
+                                      22,
+                                      TimeGrid.totalHeight,
+                                    ),
+                                    child: ActivityBlock(
+                                      occurrence: occ,
+                                      onTap: () => widget.onBlockTap(occ),
+                                    ),
+                                  );
+                                }).toList(),
+                              );
+                            },
+                          ),
+                        ),
                       ],
                     ),
                   ),

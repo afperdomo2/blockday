@@ -141,10 +141,21 @@ Notas de implementación:
 
 ## Hito 17 — Solapamientos lado a lado
 
-- [ ] Lógica pura de layout: agrupar ocurrencias que se pisan + asignar
+- [x] Lógica pura de layout: agrupar ocurrencias que se pisan + asignar
       columnas
-- [ ] Aplicar en `time_grid.dart` (día) y `week_view.dart`
-- [ ] Tests unitarios de layout (0, 2, 3+ solapes, encadenados, bordes)
+- [x] Aplicar en `time_grid.dart` (día) y `week_view.dart`
+- [x] Tests unitarios de layout (0, 2, 3+ solapes, encadenados, bordes)
+
+Notas de implementación:
+- `lib/features/activities/domain/overlap_layout.dart` expone
+  `layoutOverlaps(List<Occurrence>) → List<LaidOutOccurrence>`
+  (`occurrence`, `column`, `totalColumns`). Intervalos `[start, end)`: bordes
+  exactos no solapan; clusters transitivos (encadenados A∩B∩C comparten grupo
+  aunque A∩C no se pisen).
+- `time_grid.dart` y `week_view.dart` solo consumen el layout (cálculo de
+  geometría con `LayoutBuilder`, sin lógica de solapes duplicada).
+- Vista semana con `totalColumns > 2` usa `_WeekBlock(compact: true)`: fuente
+  9, padding 2 y sin icono de vínculo, para legibilidad en columna angosta.
 
 ## Hito 18 — Drag crear/redimensionar
 

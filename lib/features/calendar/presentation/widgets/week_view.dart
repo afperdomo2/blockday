@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/theme/activity_colors.dart';
 import '../../../activities/domain/occurrence.dart';
+import '../../../activities/domain/overlap_layout.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
 
 class WeekView extends ConsumerStatefulWidget {
@@ -171,29 +172,58 @@ class _WeekViewState extends ConsumerState<WeekView> {
                                           );
                                         }),
                                       ),
-                                      ...dayOcc.map((occ) {
-                                        final startMin =
-                                            occ.start.hour * 60 +
-                                            occ.start.minute;
-                                        final endMin =
-                                            occ.end.hour * 60 + occ.end.minute;
-                                        final top =
-                                            startMin / 60 * WeekView.hourHeight;
-                                        final height =
-                                            (endMin - startMin) /
-                                            60 *
-                                            WeekView.hourHeight;
-                                        return Positioned(
-                                          top: top + 1,
-                                          left: 2,
-                                          right: 2,
-                                          height: height.clamp(
-                                            18,
-                                            WeekView.totalHeight,
-                                          ),
-                                          child: _WeekBlock(occurrence: occ),
-                                        );
-                                      }),
+                                      Positioned.fill(
+                                        child: LayoutBuilder(
+                                          builder: (context, constraints) {
+                                            const gutter = 4.0;
+                                            final available =
+                                                (constraints.maxWidth - gutter)
+                                                    .clamp(
+                                                      0.0,
+                                                      double.infinity,
+                                                    );
+                                            final laid = layoutOverlaps(dayOcc);
+                                            return Stack(
+                                              children: laid.map((item) {
+                                                final occ = item.occurrence;
+                                                final columnWidth =
+                                                    available /
+                                                    item.totalColumns;
+                                                final startMin =
+                                                    occ.start.hour * 60 +
+                                                    occ.start.minute;
+                                                final endMin =
+                                                    occ.end.hour * 60 +
+                                                    occ.end.minute;
+                                                final top =
+                                                    startMin /
+                                                    60 *
+                                                    WeekView.hourHeight;
+                                                final height =
+                                                    (endMin - startMin) /
+                                                    60 *
+                                                    WeekView.hourHeight;
+                                                return Positioned(
+                                                  top: top + 1,
+                                                  left:
+                                                      2 +
+                                                      columnWidth * item.column,
+                                                  width: columnWidth - 2,
+                                                  height: height.clamp(
+                                                    18,
+                                                    WeekView.totalHeight,
+                                                  ),
+                                                  child: _WeekBlock(
+                                                    occurrence: occ,
+                                                    compact:
+                                                        item.totalColumns > 2,
+                                                  ),
+                                                );
+                                              }).toList(),
+                                            );
+                                          },
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -298,8 +328,9 @@ class _WeekHeader extends StatelessWidget {
 }
 
 class _WeekBlock extends StatelessWidget {
-  const _WeekBlock({required this.occurrence});
+  const _WeekBlock({required this.occurrence, this.compact = false});
   final Occurrence occurrence;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -316,7 +347,7 @@ class _WeekBlock extends StatelessWidget {
           color: bg,
           borderRadius: BorderRadius.circular(6),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        padding: EdgeInsets.symmetric(horizontal: compact ? 2 : 4, vertical: 2),
         child: Row(
           children: [
             Expanded(
@@ -324,14 +355,14 @@ class _WeekBlock extends StatelessWidget {
                 occurrence.title,
                 style: TextStyle(
                   color: fg,
-                  fontSize: 10,
+                  fontSize: compact ? 9 : 10,
                   fontWeight: FontWeight.w600,
                 ),
-                maxLines: 2,
+                maxLines: compact ? 3 : 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            if (isLinked) ...[
+            if (isLinked && !compact) ...[
               const SizedBox(width: 2),
               Icon(Icons.link, size: 10, color: fg.withValues(alpha: 0.9)),
             ],

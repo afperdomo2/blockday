@@ -109,4 +109,52 @@ void main() {
     await tester.pump();
     expect(tappedId, 'a1');
   });
+
+  testWidgets('overlapping blocks render side by side', (tester) async {
+    final date = DateTime(2025, 1, 6);
+    final a = Occurrence(
+      activityId: 'a1',
+      title: 'Solape A',
+      color: 0,
+      date: date,
+      start: DateTime(2025, 1, 6, 8, 0),
+      end: DateTime(2025, 1, 6, 10, 0),
+    );
+    final b = Occurrence(
+      activityId: 'a2',
+      title: 'Solape B',
+      color: 1,
+      date: date,
+      start: DateTime(2025, 1, 6, 9, 0),
+      end: DateTime(2025, 1, 6, 11, 0),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sessionsStreamProvider.overrideWith((ref) => Stream.value([])),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: TimeGrid(
+              date: date,
+              occurrences: [a, b],
+              onEmptyTap: (_, _) {},
+              onBlockTap: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Solape A'), findsOneWidget);
+    expect(find.text('Solape B'), findsOneWidget);
+
+    final rectA = tester.getRect(find.text('Solape A'));
+    final rectB = tester.getRect(find.text('Solape B'));
+    expect(rectA.right, lessThanOrEqualTo(rectB.left));
+
+    await tester.tap(find.text('Solape B'));
+    await tester.pump();
+  });
 }
