@@ -14,3 +14,9 @@ String formatHourRange(DateTime start, DateTime end) {
 String formatHour(DateTime date) {
   return DateFormat('HH:mm', 'es').format(date);
 }
+
+String formatDayShort(DateTime date) {
+  final f = DateFormat('EEE d MMM', 'es');
+  final text = f.format(date);
+  return text[0].toUpperCase() + text.substring(1);
+}

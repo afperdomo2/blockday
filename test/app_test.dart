@@ -2,6 +2,7 @@ import 'package:blockday/app.dart';
 import 'package:blockday/features/activities/data/app_database.dart';
 import 'package:blockday/features/activities/providers/activities_providers.dart';
 import 'package:blockday/features/activities/providers/activities_stream_provider.dart';
+import 'package:blockday/features/backlog/providers/tasks_providers.dart';
 import 'package:blockday/routes/app_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,6 +25,8 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
           activitiesStreamProvider.overrideWith((ref) => Stream.value([])),
+          tasksStreamProvider.overrideWith((ref) => Stream.value([])),
+          sessionsStreamProvider.overrideWith((ref) => Stream.value([])),
         ],
         child: const BlockdayApp(),
       ),
@@ -41,6 +44,8 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
           activitiesStreamProvider.overrideWith((ref) => Stream.value([])),
+          tasksStreamProvider.overrideWith((ref) => Stream.value([])),
+          sessionsStreamProvider.overrideWith((ref) => Stream.value([])),
         ],
         child: const BlockdayApp(),
       ),
@@ -62,6 +67,8 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
           activitiesStreamProvider.overrideWith((ref) => Stream.value([])),
+          tasksStreamProvider.overrideWith((ref) => Stream.value([])),
+          sessionsStreamProvider.overrideWith((ref) => Stream.value([])),
         ],
         child: const BlockdayApp(),
       ),
@@ -82,6 +89,8 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
           activitiesStreamProvider.overrideWith((ref) => Stream.value([])),
+          tasksStreamProvider.overrideWith((ref) => Stream.value([])),
+          sessionsStreamProvider.overrideWith((ref) => Stream.value([])),
         ],
         child: const BlockdayApp(),
       ),

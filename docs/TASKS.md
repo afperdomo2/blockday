@@ -118,14 +118,26 @@ en verde (ver AGENTS.md).
 
 ## Hito 16 — Dashboard "Inicio"
 
-- [ ] Reemplazar `HomeScreen` vacío (`SizedBox.shrink`) por un dashboard real
-- [ ] Cabecera "Hoy" + fecha
-- [ ] Bloques de hoy (`dayOccurrencesProvider(today)`)
-- [ ] Próximos (N días siguientes)
-- [ ] Tareas sin programar (captura rápida)
-- [ ] Resumen semanal (X/Y sesiones) reutilizando `taskProgressProvider`
-- [ ] Botones rápidos: nueva actividad / nueva tarea
-- [ ] Widget tests (estado vacío y con datos)
+- [x] Reemplazar `HomeScreen` vacío (`SizedBox.shrink`) por un dashboard real
+- [x] Cabecera "Hoy" + fecha (`formatDayHeader`)
+- [x] Bloques de hoy (`dayOccurrencesProvider(today)`)
+- [x] Próximos (7 días siguientes vía `rangeOccurrencesProvider`, tope 8)
+- [x] Tareas sin programar (captura rápida con botón "Nueva tarea")
+- [x] Resumen semanal (X/Y sesiones): decisión → métrica semanal real
+      (semanal = ocurrencias de la semana + sesiones completadas), no suma
+      de `taskProgressProvider` (que es histórico). `taskProgressProvider`
+      sí alimenta la sección de tareas vía `taskStatusProvider`
+- [x] Botones rápidos: nueva actividad / nueva tarea
+- [x] Widget tests (estado vacío y con datos)
+
+Notas de implementación:
+- `home_screen.dart` usa sólo providers; la agregación semanal vive en
+  `home/providers/home_providers.dart` (`weeklyProgressProvider`).
+- Los widget tests sobreescriben los streams (`activitiesStreamProvider`,
+  `tasksStreamProvider`, `sessionsStreamProvider`) para evitar que los
+  streams `.watch()` de Drift dejen un timer pendiente al desmontar
+  `ProviderScope` (invariante `!timersPending` de `flutter_test`).
+  `app_test` se actualizó igual por renderizar `HomeScreen`.
 
 ## Hito 17 — Solapamientos lado a lado
 
