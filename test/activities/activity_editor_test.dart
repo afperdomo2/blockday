@@ -117,4 +117,112 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('backlog'), findsOneWidget);
   });
+
+  testWidgets('start/end params prefill single-mode range', (tester) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+    await _pumpEditor(
+      tester,
+      db,
+      _buildRouter(
+        '/activity/new?date=2025-01-06T00:00:00.000&start=600&end=690',
+      ),
+    );
+    await tester.enterText(find.byType(TextFormField).first, 'Arrastrada');
+    await tester.tap(find.text('Guardar'));
+    await tester.pumpAndSettle();
+    final all = await db.select(db.activities).get();
+    expect(all.length, 1);
+    final start = DateTime.fromMillisecondsSinceEpoch(all.first.singleStart!);
+    final end = DateTime.fromMillisecondsSinceEpoch(all.first.singleEnd!);
+    expect(start, DateTime(2025, 1, 6, 10, 0));
+    expect(end, DateTime(2025, 1, 6, 11, 30));
+  });
+
+  testWidgets('start/end params take precedence over hour param', (
+    tester,
+  ) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+    await _pumpEditor(
+      tester,
+      db,
+      _buildRouter(
+        '/activity/new?date=2025-01-06T00:00:00.000&hour=8&start=600&end=690',
+      ),
+    );
+    await tester.enterText(find.byType(TextFormField).first, 'Prioridad');
+    await tester.tap(find.text('Guardar'));
+    await tester.pumpAndSettle();
+    final all = await db.select(db.activities).get();
+    final start = DateTime.fromMillisecondsSinceEpoch(all.first.singleStart!);
+    final end = DateTime.fromMillisecondsSinceEpoch(all.first.singleEnd!);
+    expect(start, DateTime(2025, 1, 6, 10, 0));
+    expect(end, DateTime(2025, 1, 6, 11, 30));
+  });
+
+  testWidgets('start/end params apply in edit mode after load', (tester) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+    await db
+        .into(db.activities)
+        .insert(
+          ActivitiesCompanion.insert(
+            id: 'resize-1',
+            title: 'Existente',
+            color: 2,
+            kind: 'single',
+            singleStart: Value(DateTime(2025, 1, 10, 8).millisecondsSinceEpoch),
+            singleEnd: Value(DateTime(2025, 1, 10, 9).millisecondsSinceEpoch),
+          ),
+        );
+    await _pumpEditor(
+      tester,
+      db,
+      _buildRouter('/activity/resize-1?start=600&end=690&from=/calendar'),
+    );
+    expect(find.text('Editar actividad'), findsOneWidget);
+    await tester.tap(find.text('Guardar'));
+    await tester.pumpAndSettle();
+    expect(find.text('calendar'), findsOneWidget);
+    final all = await db.select(db.activities).get();
+    final start = DateTime.fromMillisecondsSinceEpoch(all.first.singleStart!);
+    final end = DateTime.fromMillisecondsSinceEpoch(all.first.singleEnd!);
+    expect(start, DateTime(2025, 1, 10, 10, 0));
+    expect(end, DateTime(2025, 1, 10, 11, 30));
+  });
+
+  testWidgets('start/end params apply to recurring rule in edit mode', (
+    tester,
+  ) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+    await db
+        .into(db.activities)
+        .insert(
+          ActivitiesCompanion.insert(
+            id: 'rec-1',
+            title: 'Recurrente',
+            color: 1,
+            kind: 'recurring',
+            weekdays: Value(1),
+            firstDate: Value(DateTime(2025, 1, 6).millisecondsSinceEpoch),
+            startMinutes: Value(1020),
+            endMinutes: Value(1140),
+            endType: Value('never'),
+          ),
+        );
+    await _pumpEditor(
+      tester,
+      db,
+      _buildRouter('/activity/rec-1?start=480&end=600&from=/calendar'),
+    );
+    expect(find.text('Editar actividad'), findsOneWidget);
+    await tester.tap(find.text('Guardar'));
+    await tester.pumpAndSettle();
+    expect(find.text('calendar'), findsOneWidget);
+    final all = await db.select(db.activities).get();
+    expect(all.first.startMinutes, 480);
+    expect(all.first.endMinutes, 600);
+  });
 }

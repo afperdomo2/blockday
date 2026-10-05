@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/utils/date_format.dart';
+import '../../../activities/domain/occurrence.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
 import '../../providers/calendar_state.dart';
 import '../widgets/month_view.dart';
@@ -116,56 +117,7 @@ class CalendarScreen extends ConsumerWidget {
                       selectedDate: selectedDate,
                     );
                   }
-                  if (occurrences.isEmpty) {
-                    return Column(
-                      key: ValueKey('day-empty-$selectedDate'),
-                      children: [
-                        _DateChip(date: selectedDate),
-                        Expanded(
-                          child: TimeGrid(
-                            date: selectedDate,
-                            occurrences: const [],
-                            onEmptyTap: (h, m) => context.go(
-                              '/activity/new?date=${selectedDate.toIso8601String()}&hour=$h&from=/calendar',
-                            ),
-                            onBlockTap: (occ) => context.go(
-                              '/activity/${occ.activityId}?from=/calendar',
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Text(
-                            'Sin actividades para este día',
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                  return Column(
-                    key: ValueKey('day-$selectedDate'),
-                    children: [
-                      _DateChip(date: selectedDate),
-                      Expanded(
-                        child: TimeGrid(
-                          date: selectedDate,
-                          occurrences: occurrences,
-                          onEmptyTap: (h, m) => context.go(
-                            '/activity/new?date=${selectedDate.toIso8601String()}&hour=$h&from=/calendar',
-                          ),
-                          onBlockTap: (occ) => context.go(
-                            '/activity/${occ.activityId}?from=/calendar',
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
+                  return _buildDayGrid(context, selectedDate, occurrences);
                 },
               ),
             ),
@@ -180,6 +132,46 @@ class CalendarScreen extends ConsumerWidget {
         icon: const Icon(Icons.add),
         label: const Text('Nueva'),
       ),
+    );
+  }
+
+  Widget _buildDayGrid(
+    BuildContext context,
+    DateTime selectedDate,
+    List<Occurrence> occurrences,
+  ) {
+    return Column(
+      key: ValueKey('day-$selectedDate'),
+      children: [
+        _DateChip(date: selectedDate),
+        Expanded(
+          child: TimeGrid(
+            date: selectedDate,
+            occurrences: occurrences,
+            onEmptyTap: (h, m) => context.go(
+              '/activity/new?date=${selectedDate.toIso8601String()}&hour=$h&from=/calendar',
+            ),
+            onRangeSelected: (date, startMin, endMin) => context.go(
+              '/activity/new?date=${date.toIso8601String()}&start=$startMin&end=$endMin&from=/calendar',
+            ),
+            onBlockTap: (occ) =>
+                context.go('/activity/${occ.activityId}?from=/calendar'),
+            onBlockResize: (occ, startMin, endMin) => context.go(
+              '/activity/${occ.activityId}?start=$startMin&end=$endMin&from=/calendar',
+            ),
+          ),
+        ),
+        if (occurrences.isEmpty)
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              'Sin actividades para este día',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

@@ -14,10 +14,20 @@ class ActivityBlock extends ConsumerWidget {
     super.key,
     required this.occurrence,
     required this.onTap,
+    this.showResizeHandles = false,
+    this.onResizeStart,
+    this.onResizeUpdate,
+    this.onResizeEnd,
   });
 
   final Occurrence occurrence;
   final VoidCallback onTap;
+  final bool showResizeHandles;
+  final void Function(DragStartDetails details, bool isTop)? onResizeStart;
+  final void Function(DragUpdateDetails details)? onResizeUpdate;
+  final void Function(DragEndDetails details)? onResizeEnd;
+
+  static const double resizeHandleHeight = 24;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,76 +54,117 @@ class ActivityBlock extends ConsumerWidget {
         ) ??
         false;
 
+    void toggleSession() {
+      final dur = occurrence.end.difference(occurrence.start).inMinutes;
+      ref
+          .read(sessionsRepositoryProvider)
+          .toggleCompleted(
+            occurrence.activityId,
+            occurrence.date,
+            actualMinutes: dur,
+          );
+    }
+
     final content = Material(
       color: isCompleted ? bg.withValues(alpha: 0.62) : bg,
       borderRadius: BorderRadius.circular(AppRadius.md),
       elevation: 1,
-      child: InkWell(
-        onTap: onTap,
-        onLongPress: isLinked
-            ? () {
-                final dur = occurrence.end
-                    .difference(occurrence.start)
-                    .inMinutes;
-                ref
-                    .read(sessionsRepositoryProvider)
-                    .toggleCompleted(
-                      occurrence.activityId,
-                      occurrence.date,
-                      actualMinutes: dur,
-                    );
-              }
-            : null,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.sm,
-            vertical: AppSpacing.xs,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      occurrence.title,
-                      style: ts.labelLarge?.copyWith(
-                        color: fg,
-                        fontWeight: FontWeight.w600,
-                        decoration: isCompleted
-                            ? TextDecoration.lineThrough
-                            : null,
+      child: GestureDetector(
+        behavior: HitTestBehavior.deferToChild,
+        onLongPress: isLinked ? null : () {},
+        child: InkWell(
+          onTap: onTap,
+          onLongPress: isLinked ? toggleSession : null,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.xs,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        occurrence.title,
+                        style: ts.labelLarge?.copyWith(
+                          color: fg,
+                          fontWeight: FontWeight.w600,
+                          decoration: isCompleted
+                              ? TextDecoration.lineThrough
+                              : null,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  if (isLinked) ...[
-                    const SizedBox(width: AppSpacing.xs),
-                    Icon(
-                      isCompleted ? Icons.check_circle : Icons.link,
-                      size: 14,
-                      color: fg.withValues(alpha: 0.9),
-                    ),
+                    if (isLinked) ...[
+                      const SizedBox(width: AppSpacing.xs),
+                      Icon(
+                        isCompleted ? Icons.check_circle : Icons.link,
+                        size: 14,
+                        color: fg.withValues(alpha: 0.9),
+                      ),
+                    ],
                   ],
-                ],
-              ),
-              Text(
-                formatHourRange(occurrence.start, occurrence.end),
-                style: ts.labelSmall?.copyWith(
-                  color: fg.withValues(alpha: 0.85),
                 ),
-                maxLines: 1,
-              ),
-            ],
+                Text(
+                  formatHourRange(occurrence.start, occurrence.end),
+                  style: ts.labelSmall?.copyWith(
+                    color: fg.withValues(alpha: 0.85),
+                  ),
+                  maxLines: 1,
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
 
-    if (AppMotion.reduceMotion(context)) return content;
+    Widget body;
+    if (showResizeHandles) {
+      body = Stack(
+        children: [
+          Positioned.fill(child: content),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: resizeHandleHeight,
+            child: _BlockResizeHandle(
+              isTop: true,
+              onTap: onTap,
+              onLongPress: isLinked ? toggleSession : null,
+              onDragStart: onResizeStart,
+              onDragUpdate: onResizeUpdate,
+              onDragEnd: onResizeEnd,
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: resizeHandleHeight,
+            child: _BlockResizeHandle(
+              isTop: false,
+              onTap: onTap,
+              onLongPress: isLinked ? toggleSession : null,
+              onDragStart: onResizeStart,
+              onDragUpdate: onResizeUpdate,
+              onDragEnd: onResizeEnd,
+            ),
+          ),
+        ],
+      );
+    } else {
+      body = content;
+    }
+
+    if (AppMotion.reduceMotion(context)) return body;
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.95, end: 1),
@@ -121,7 +172,50 @@ class ActivityBlock extends ConsumerWidget {
       curve: AppMotion.enter,
       builder: (context, scale, child) =>
           Transform.scale(scale: scale, child: child),
-      child: content,
+      child: body,
+    );
+  }
+}
+
+class _BlockResizeHandle extends StatelessWidget {
+  const _BlockResizeHandle({
+    required this.isTop,
+    required this.onTap,
+    required this.onLongPress,
+    required this.onDragStart,
+    required this.onDragUpdate,
+    required this.onDragEnd,
+  });
+
+  final bool isTop;
+  final VoidCallback onTap;
+  final VoidCallback? onLongPress;
+  final void Function(DragStartDetails, bool)? onDragStart;
+  final void Function(DragUpdateDetails)? onDragUpdate;
+  final void Function(DragEndDetails)? onDragEnd;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      onVerticalDragStart: onDragStart == null
+          ? null
+          : (details) => onDragStart!(details, isTop),
+      onVerticalDragUpdate: onDragUpdate,
+      onVerticalDragEnd: onDragEnd,
+      child: Center(
+        child: Container(
+          width: 28,
+          height: 3,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.onSurface
+                .withValues(alpha: 0.35),
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+          ),
+        ),
+      ),
     );
   }
 }

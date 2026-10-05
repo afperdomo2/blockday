@@ -59,6 +59,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
   bool _saving = false;
   bool _taskPrefilled = false;
   String _returnTo = '/calendar';
+  (int, int)? _pendingRange;
 
   @override
   void initState() {
@@ -69,7 +70,11 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
   void _initFromQuery() {
     final state = GoRouterState.of(context);
     _returnTo = _sanitizeReturn(state.uri.queryParameters['from']);
-    if (widget.activityId != null) return;
+    final range = _parseRangeQuery(state.uri);
+    if (widget.activityId != null) {
+      _pendingRange = range;
+      return;
+    }
     final dateStr = state.uri.queryParameters['date'];
     final hourStr = state.uri.queryParameters['hour'];
     final taskIdParam = state.uri.queryParameters['taskId'];
@@ -93,10 +98,36 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
         });
       }
     }
+    if (range != null) {
+      setState(() => _applyRangeQuery(range));
+    }
     if (taskIdParam != null && !_taskPrefilled) {
       _taskId = taskIdParam;
       _prefillFromTask(taskIdParam);
     }
+  }
+
+  (int, int)? _parseRangeQuery(Uri uri) {
+    final startStr = uri.queryParameters['start'];
+    final endStr = uri.queryParameters['end'];
+    if (startStr == null || endStr == null) return null;
+    final start = int.tryParse(startStr);
+    final end = int.tryParse(endStr);
+    if (start == null || end == null) return null;
+    if (start < 0 || start >= end || end > 1440) return null;
+    return (start, end);
+  }
+
+  void _applyRangeQuery((int, int) range) {
+    _singleStart = _minutesToTimeOfDay(range.$1);
+    _singleEnd = _minutesToTimeOfDay(range.$2);
+    _recStart = _singleStart;
+    _recEnd = _singleEnd;
+  }
+
+  TimeOfDay _minutesToTimeOfDay(int minutes) {
+    final m = minutes.clamp(0, 1439);
+    return TimeOfDay(hour: m ~/ 60, minute: m % 60);
   }
 
   String _sanitizeReturn(String? from) {
@@ -192,6 +223,11 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
         _endCondition = _EndCondition.count;
         _countCtrl.text = end.count.toString();
       }
+    }
+    final pending = _pendingRange;
+    if (pending != null) {
+      _pendingRange = null;
+      _applyRangeQuery(pending);
     }
   }
 

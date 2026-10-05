@@ -159,9 +159,40 @@ Notas de implementación:
 
 ## Hito 18 — Drag crear/redimensionar
 
-- [ ] Drag en hueco crea bloque; drag en bordes redimensiona
-- [ ] Feedback visual + precarga del editor con el rango arrastrado
-- [ ] Widget tests de los gestos críticos
+- [x] Drag en hueco crea bloque; drag en bordes redimensiona
+- [x] Feedback visual + precarga del editor con el rango arrastrado
+- [x] Widget tests de los gestos críticos
+
+Notas de implementación:
+- `lib/features/calendar/domain/drag_time.dart`: lógica pura
+  `minutesFromOffset()` (px→minutos clamp 0..1439), `snapMinutes()` (paso
+  15 min, clamp) y `normalizeRange()` (ordena rango invertido, duración
+  mínima 15 min, shift hacia atrás cerca de medianoche).
+- Crear: **long-press + drag** en el hueco del `TimeGrid` (el tap simple
+  sigue creando 1h; el long-press gana la arena de gestos contra el
+  `SingleChildScrollView`, así el scroll nunca se bloquea). Long-press sin
+  mover = bloque de 1h desde la hora presionada. Haptic `lightImpact` al
+  iniciar/soltar.
+- Redimensionar: handles invisibles de 24px (`ActivityBlock.resizeHandleHeight`)
+  en bordes superior/inferior de bloques con altura ≥44px
+  (`TimeGrid.minBlockHeightForHandles`). Los handles están DENTRO de
+  `ActivityBlock` y reenvían `onTap`/`onLongPress` (preservan editar y
+  toggle de sesión); el cuerpo del bloque absorbe long-presses con un
+  `GestureDetector` no-op para que el drag-crear no arranque sobre bloques.
+- Feedback: overlay translúcido con pastilla del rango
+  (`formatHourRange`) — `primaryContainer` al crear, color de la actividad
+  al redimensionar; `Semantics(label: 'Vista previa …')`.
+- Conversión px→minutos vía `globalPosition` + `globalToLocal` sobre la
+  pila de contenido (`GlobalKey`), porque `localPosition` de los handles es
+  relativo al handle, no a la grid.
+- Navegación: `onRangeSelected` → `/activity/new?date=…&start=…&end=…`;
+  `onBlockResize` → `/activity/:id?start=…&end=…` (en recurrentes el
+  editor precarga las horas de la regla — el usuario confirma).
+- Editor: nuevos query params `start`/`end` (minutos del día 0..1440);
+  tienen prioridad sobre `hour`. En modo edición se aplican tras
+  `_populateFromActivity` vía `_pendingRange` (`_initFromQuery` ya no
+  retorna temprano sin parsear el rango).
+- Alcance: vista día únicamente; drag en vista semana queda pendiente.
 
 ## Hito 19 — Pantalla de ajustes
 
