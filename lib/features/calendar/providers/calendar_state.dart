@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum CalendarView { day, week, month }
+enum CalendarView { day, threeDay, week, month }
 
 class CalendarState {
   const CalendarState({
@@ -66,6 +66,16 @@ class CalendarStateNotifier extends Notifier<CalendarState> {
   void previousWeek() {
     final d = state.selectedDate;
     goTo(DateTime(d.year, d.month, d.day - 7));
+  }
+
+  void nextThreeDay() {
+    final d = state.selectedDate;
+    goTo(DateTime(d.year, d.month, d.day + 3));
+  }
+
+  void previousThreeDay() {
+    final d = state.selectedDate;
+    goTo(DateTime(d.year, d.month, d.day - 3));
   }
 
   void nextMonth() {

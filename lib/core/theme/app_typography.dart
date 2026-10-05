@@ -44,4 +44,14 @@ abstract final class AppTypography {
       labelSmall: themed.labelSmall?.copyWith(letterSpacing: 0.3),
     );
   }
+
+  static const TextStyle weekBlock = TextStyle(
+    fontSize: 10,
+    fontWeight: FontWeight.w600,
+  );
+
+  static const TextStyle weekBlockCompact = TextStyle(
+    fontSize: 9,
+    fontWeight: FontWeight.w600,
+  );
 }

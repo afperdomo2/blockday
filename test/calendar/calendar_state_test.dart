@@ -65,6 +65,27 @@ void main() {
       expect(container.read(calendarStateProvider).view, CalendarView.week);
       notifier.setView(CalendarView.month);
       expect(container.read(calendarStateProvider).view, CalendarView.month);
+      notifier.setView(CalendarView.threeDay);
+      expect(container.read(calendarStateProvider).view, CalendarView.threeDay);
+    });
+
+    test('threeDay view navigates by 3 days', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final notifier = container.read(calendarStateProvider.notifier);
+      notifier.setView(CalendarView.threeDay);
+      notifier.goTo(DateTime(2025, 1, 30));
+      notifier.nextThreeDay();
+      expect(
+        container.read(calendarStateProvider).selectedDate,
+        DateTime(2025, 2, 2),
+      );
+      notifier.previousThreeDay();
+      notifier.previousThreeDay();
+      expect(
+        container.read(calendarStateProvider).selectedDate,
+        DateTime(2025, 1, 27),
+      );
     });
 
     test('month boundary navigation', () {

@@ -8,6 +8,7 @@ import '../../../activities/domain/occurrence.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
 import '../../providers/calendar_state.dart';
 import '../widgets/month_view.dart';
+import '../widgets/three_day_view.dart';
 import '../widgets/time_grid.dart';
 import '../widgets/week_view.dart';
 
@@ -27,6 +28,8 @@ class CalendarScreen extends ConsumerWidget {
       final notifier = ref.read(calendarStateProvider.notifier);
       if (view == CalendarView.day) {
         notifier.previousDay();
+      } else if (view == CalendarView.threeDay) {
+        notifier.previousThreeDay();
       } else if (view == CalendarView.week) {
         notifier.previousWeek();
       } else {
@@ -38,6 +41,8 @@ class CalendarScreen extends ConsumerWidget {
       final notifier = ref.read(calendarStateProvider.notifier);
       if (view == CalendarView.day) {
         notifier.nextDay();
+      } else if (view == CalendarView.threeDay) {
+        notifier.nextThreeDay();
       } else if (view == CalendarView.week) {
         notifier.nextWeek();
       } else {
@@ -71,27 +76,38 @@ class CalendarScreen extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            child: SegmentedButton<CalendarView>(
-              segments: const [
-                ButtonSegment(
-                  value: CalendarView.day,
-                  label: Text('Día'),
-                  icon: Icon(Icons.view_day),
-                ),
-                ButtonSegment(
-                  value: CalendarView.week,
-                  label: Text('Semana'),
-                  icon: Icon(Icons.view_week),
-                ),
-                ButtonSegment(
-                  value: CalendarView.month,
-                  label: Text('Mes'),
-                  icon: Icon(Icons.calendar_month),
-                ),
-              ],
-              selected: {view},
-              onSelectionChanged: (s) =>
-                  ref.read(calendarStateProvider.notifier).setView(s.first),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final wide = constraints.maxWidth >= 600;
+                return SegmentedButton<CalendarView>(
+                  showSelectedIcon: false,
+                  segments: [
+                    ButtonSegment(
+                      value: CalendarView.day,
+                      label: wide ? const Text('Día') : null,
+                      icon: const Icon(Icons.view_day),
+                    ),
+                    ButtonSegment(
+                      value: CalendarView.threeDay,
+                      label: wide ? const Text('3 días') : null,
+                      icon: const Icon(Icons.view_column),
+                    ),
+                    ButtonSegment(
+                      value: CalendarView.week,
+                      label: wide ? const Text('Semana') : null,
+                      icon: const Icon(Icons.view_week),
+                    ),
+                    ButtonSegment(
+                      value: CalendarView.month,
+                      label: wide ? const Text('Mes') : null,
+                      icon: const Icon(Icons.calendar_month),
+                    ),
+                  ],
+                  selected: {view},
+                  onSelectionChanged: (s) =>
+                      ref.read(calendarStateProvider.notifier).setView(s.first),
+                );
+              },
             ),
           ),
           Expanded(
@@ -105,6 +121,12 @@ class CalendarScreen extends ConsumerWidget {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Center(child: Text('Error: $e')),
                 data: (_) {
+                  if (view == CalendarView.threeDay) {
+                    return ThreeDayView(
+                      key: ValueKey('threeDay-$selectedDate'),
+                      selectedDate: selectedDate,
+                    );
+                  }
                   if (view == CalendarView.week) {
                     return WeekView(
                       key: ValueKey('week-$selectedDate'),

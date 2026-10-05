@@ -194,7 +194,42 @@ Notas de implementación:
   retorna temprano sin parsear el rango).
 - Alcance: vista día únicamente; drag en vista semana queda pendiente.
 
-## Hito 19 — Pantalla de ajustes
+## Hito 19 — Vista 3 días + fix texto semana
+
+- [x] Vista "3 días" (fecha seleccionada + 2 días siguientes) con las
+      mismas características que la vista día (tap hueco, long-press+drag
+      crear, handles resize, toggle sesión, overlaps, previews)
+- [x] Navegación prev/next de 3 en 3 días desde la fecha seleccionada
+- [x] Fix: texto de bloques de semana vuelve a 10px (normal) / 9px
+      (compacto) — el rediseño de tokens (hito tema) lo había subido a
+      12px y cortaba títulos cortos con "…"
+- [x] Tests: estado, vista (headers, columnas, gestos), pantalla
+      (segmento + 360dp sin desbordes), tipografía de semana
+
+Notas de implementación:
+- Refactor: la lógica de columna con gestos vive en
+  `time_grid_column.dart` (`TimeGridColumn` — stateful, posee create-drag,
+  resize, previews, now-line). `TimeGrid` (día) quedó como envoltura
+  (scroll + gutter + una columna + línea "ahora" a todo el ancho).
+- `DaysHeader` (`days_header.dart`) extraído de la semana; lo comparten
+  semana y 3 días.
+- `three_day_view.dart`: header + un scroll + gutter + 3 columnas
+  (`hourHeight: 60`, igual que día); ocurrencias vía
+  `dayOccurrencesProvider(día)`; columna de hoy con tinte y now-line.
+- Navegación: `CalendarView.threeDay` + `nextThreeDay()/previousThreeDay`
+  (±3 días desde `selectedDate`; por defecto ancla en hoy).
+- Selector de vistas: 4 segmentos. Adaptativo — con ancho ≥600dp muestra
+  icono+label; por debajo solo iconos (con 4 labels+icons el
+  `SegmentedButton` desborda a 360-412dp). `showSelectedIcon: false`.
+- Fix semana: tokens `AppTypography.weekBlock` (10px w600) y
+  `weekBlockCompact` (9px w600); compacto con padding horizontal 2
+  (`AppSpacing.xxs`) y maxLines 3. Causa raíz: `39e6a76` migró el bloque
+  de `fontSize: 10` fijo a `labelMedium` (12px) + Plus Jakarta Sans (más
+  ancha), y "Estudiar AWS" ya no cabía en 2 líneas de columna angosta.
+- Pendiente futuro: evaluar eliminar la vista día si la de 3 días
+  resulta suficiente (decisión del usuario, no se elimina aún).
+
+## Hito 20 — Pantalla de ajustes
 
 - [ ] Preferencias persistentes (inicio de semana, modo de tema, formato
       12/24h)
@@ -202,19 +237,19 @@ Notas de implementación:
 - [ ] Ruta `/settings` + entrada desde el shell
 - [ ] Widget tests
 
-## Hito 20 — Búsqueda global
+## Hito 21 — Búsqueda global
 
 - [ ] Buscar actividades + tareas en una vista de resultados
 - [ ] Centralizar/reutilizar el buscador del backlog
 - [ ] Tests de filtrado
 
-## Hito 21 — Backup export/import JSON
+## Hito 22 — Backup export/import JSON
 
 - [ ] Serializar tasks, activities, exclusions y sessions a JSON
 - [ ] Exportar a archivo (file picker/sharing) + importar con validación
 - [ ] Tests round-trip export→import sin pérdida de datos
 
-## Hito 22 — Notificaciones/recordatorios
+## Hito 23 — Notificaciones/recordatorios
 
 - [ ] Añadir `flutter_local_notifications` + `timezone`
 - [ ] Migración schema 2→3: campo recordatorio por actividad

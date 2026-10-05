@@ -2,15 +2,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/theme/activity_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/date_format.dart';
 import '../../../activities/domain/occurrence.dart';
 import '../../../activities/domain/overlap_layout.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
+import 'days_header.dart';
 
 class WeekView extends ConsumerStatefulWidget {
   const WeekView({super.key, required this.selectedDate});
@@ -78,7 +79,7 @@ class _WeekViewState extends ConsumerState<WeekView> {
 
     return Column(
       children: [
-        _WeekHeader(weekDays: weekDays),
+        DaysHeader(days: weekDays),
         Expanded(
           child: SingleChildScrollView(
             controller: _controller,
@@ -275,60 +276,6 @@ class _WeekViewState extends ConsumerState<WeekView> {
   }
 }
 
-class _WeekHeader extends StatelessWidget {
-  const _WeekHeader({required this.weekDays});
-  final List<DateTime> weekDays;
-
-  @override
-  Widget build(BuildContext context) {
-    final now = DateTime.now();
-    return Container(
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
-      child: Row(
-        children: [
-          const SizedBox(width: 48),
-          ...weekDays.map((d) {
-            final isToday = isSameDay(d, now);
-            return Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                decoration: BoxDecoration(
-                  color: isToday
-                      ? Theme.of(context).colorScheme.primaryContainer
-                      : null,
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                ),
-                margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
-                child: Column(
-                  children: [
-                    Text(
-                      DateFormat('E', 'es').format(d),
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: isToday
-                            ? Theme.of(context).colorScheme.onPrimaryContainer
-                            : null,
-                      ),
-                    ),
-                    Text(
-                      '${d.day}',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: isToday ? FontWeight.bold : null,
-                        color: isToday
-                            ? Theme.of(context).colorScheme.onPrimaryContainer
-                            : null,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-}
-
 class _WeekBlock extends StatelessWidget {
   const _WeekBlock({required this.occurrence, this.compact = false});
   final Occurrence occurrence;
@@ -351,8 +298,8 @@ class _WeekBlock extends StatelessWidget {
           color: bg,
           borderRadius: BorderRadius.circular(AppRadius.sm),
         ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.xs,
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? AppSpacing.xxs : AppSpacing.xs,
           vertical: AppSpacing.xs,
         ),
         child: Row(
@@ -362,9 +309,9 @@ class _WeekBlock extends StatelessWidget {
                 occurrence.title,
                 style:
                     (compact
-                            ? Theme.of(context).textTheme.labelSmall
-                            : Theme.of(context).textTheme.labelMedium)
-                        ?.copyWith(color: fg, fontWeight: FontWeight.w600),
+                            ? AppTypography.weekBlockCompact
+                            : AppTypography.weekBlock)
+                        .copyWith(color: fg),
                 maxLines: compact ? 3 : 2,
                 overflow: TextOverflow.ellipsis,
               ),

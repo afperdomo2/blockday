@@ -76,6 +76,84 @@ void main() {
     expect(rectA.right, lessThanOrEqualTo(rectB.left));
   });
 
+  testWidgets('week block uses 10px token so short titles fit two lines', (
+    tester,
+  ) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+    final date = DateTime(2025, 1, 6);
+    final a = Occurrence(
+      activityId: 'a1',
+      title: 'Estudiar AWS',
+      color: 0,
+      date: date,
+      start: DateTime(2025, 1, 6, 17, 0),
+      end: DateTime(2025, 1, 6, 19, 0),
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          activitiesStreamProvider.overrideWith((ref) => Stream.value([])),
+          weekOccurrencesProvider.overrideWith((ref, arg) => [a]),
+        ],
+        child: MaterialApp(
+          home: Scaffold(body: WeekView(selectedDate: date)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Text && w.data == 'Estudiar AWS' && w.style?.fontSize == 10,
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('compact week blocks use 9px token when columns overlap', (
+    tester,
+  ) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+    final date = DateTime(2025, 1, 6);
+    Occurrence occ(String id, String title) => Occurrence(
+      activityId: id,
+      title: title,
+      color: 0,
+      date: date,
+      start: DateTime(2025, 1, 6, 8, 0),
+      end: DateTime(2025, 1, 6, 11, 0),
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          activitiesStreamProvider.overrideWith((ref) => Stream.value([])),
+          weekOccurrencesProvider.overrideWith(
+            (ref, arg) => [
+              occ('a1', 'Solape A'),
+              occ('a2', 'Solape B'),
+              occ('a3', 'Solape C'),
+            ],
+          ),
+        ],
+        child: MaterialApp(
+          home: Scaffold(body: WeekView(selectedDate: date)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    for (final title in ['Solape A', 'Solape B', 'Solape C']) {
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is Text && w.data == title && w.style?.fontSize == 9,
+        ),
+        findsOneWidget,
+      );
+    }
+  });
+
   testWidgets('month view renders month grid', (tester) async {
     final db = AppDatabase.memory();
     addTearDown(db.close);
