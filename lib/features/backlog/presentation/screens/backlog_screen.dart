@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/widgets/section_header.dart';
 import '../../domain/task.dart';
 import '../../providers/tasks_providers.dart';
 import '../widgets/task_tile.dart';
@@ -87,7 +89,7 @@ class _BacklogScreenState extends ConsumerState<BacklogScreen> {
                 const Expanded(
                   child: Center(
                     child: Padding(
-                      padding: EdgeInsets.all(24),
+                      padding: EdgeInsets.all(AppSpacing.xxl),
                       child: Text(
                         'Sin tareas aún.\nCrea una con el botón + y luego prográmala en el calendario.',
                         textAlign: TextAlign.center,
@@ -108,7 +110,7 @@ class _BacklogScreenState extends ConsumerState<BacklogScreen> {
                 child: filtered.isEmpty
                     ? Center(
                         child: Padding(
-                          padding: const EdgeInsets.all(24),
+                          padding: const EdgeInsets.all(AppSpacing.xxl),
                           child: Text(
                             _searchQuery.isEmpty
                                 ? 'Sin tareas'
@@ -216,12 +218,15 @@ class _BacklogScreenState extends ConsumerState<BacklogScreen> {
     ];
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       child: Row(
         children: filters.map((f) {
           final selected = _statusFilter == f.$1;
           return Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.only(right: AppSpacing.sm),
             child: FilterChip(
               label: Text(f.$2),
               selected: selected,
@@ -304,32 +309,20 @@ class _Section extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-          child: Row(
-            children: [
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleSmall
-                    ?.copyWith(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '$count',
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
-              ),
-            ],
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.md,
+            AppSpacing.lg,
+            AppSpacing.xs,
           ),
+          child: SectionHeader(title: title, count: count),
         ),
         if (tasks.isEmpty)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
             child: Text(
               emptyText,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/utils/date_format.dart';
 import '../../../activities/domain/occurrence.dart';
 import '../../../activities/domain/overlap_layout.dart';
 import 'activity_block.dart';
@@ -35,7 +36,7 @@ class _TimeGridState extends State<TimeGrid> {
   void initState() {
     super.initState();
     final now = DateTime.now();
-    if (_isSameDay(widget.date, now)) {
+    if (isSameDay(widget.date, now)) {
       _now = now;
       _nowTop = (now.hour * 60 + now.minute) / 60 * TimeGrid.hourHeight;
       final offset = (_nowTop! - 120).clamp(0.0, TimeGrid.totalHeight);
@@ -196,6 +197,3 @@ class _TimeGridState extends State<TimeGrid> {
     );
   }
 }
-
-bool _isSameDay(DateTime a, DateTime b) =>
-    a.year == b.year && a.month == b.month && a.day == b.day;

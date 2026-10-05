@@ -1,47 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/widgets/app_progress_bar.dart';
 import '../../domain/task.dart';
 import '../../providers/tasks_providers.dart';
-
-String _kindLabel(TaskKind kind) {
-  switch (kind) {
-    case TaskKind.task:
-      return 'Tarea';
-    case TaskKind.learning:
-      return 'Aprendizaje';
-    case TaskKind.note:
-      return 'Nota';
-    case TaskKind.project:
-      return 'Proyecto';
-  }
-}
-
-String _statusLabel(TaskStatus status) {
-  switch (status) {
-    case TaskStatus.pending:
-      return 'Sin programar';
-    case TaskStatus.scheduled:
-      return 'Programada';
-    case TaskStatus.inProgress:
-      return 'En progreso';
-    case TaskStatus.completed:
-      return 'Hecha';
-  }
-}
-
-IconData _kindIcon(TaskKind kind) {
-  switch (kind) {
-    case TaskKind.task:
-      return Icons.check_circle_outline;
-    case TaskKind.learning:
-      return Icons.school_outlined;
-    case TaskKind.note:
-      return Icons.note_outlined;
-    case TaskKind.project:
-      return Icons.folder_outlined;
-  }
-}
+import '../task_labels.dart';
 
 class TaskTile extends ConsumerWidget {
   const TaskTile({super.key, required this.task, required this.onTap});
@@ -53,12 +19,13 @@ class TaskTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final progress = ref.watch(taskProgressProvider(task.id));
     final cs = Theme.of(context).colorScheme;
+    final ts = Theme.of(context).textTheme;
 
     String subtitle;
     if (progress.status == TaskStatus.completed) {
-      subtitle = 'Hecha · ${_kindLabel(task.kind)}';
+      subtitle = 'Hecha · ${kindLabel(task.kind)}';
     } else if (progress.isUnscheduled) {
-      subtitle = _statusLabel(progress.status);
+      subtitle = statusLabel(progress.status);
     } else if (progress.totalPlannedSessions > 0) {
       final hPlan = (progress.totalPlannedMinutes / 60).toStringAsFixed(1);
       final hAct = (progress.totalActualMinutes / 60).toStringAsFixed(1);
@@ -67,7 +34,7 @@ class TaskTile extends ConsumerWidget {
             '${progress.completedSessions}/${progress.totalPlannedSessions} sesiones · $hAct/$hPlan h';
       } else {
         subtitle =
-            '${progress.totalPlannedSessions} sesiones · $hPlan h · ${_statusLabel(progress.status)}';
+            '${progress.totalPlannedSessions} sesiones · $hPlan h · ${statusLabel(progress.status)}';
       }
     } else {
       subtitle = '${progress.linkedActivitiesCount} bloques vinculados';
@@ -76,16 +43,22 @@ class TaskTile extends ConsumerWidget {
     final hasLink = !progress.isUnscheduled;
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      margin: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadius.lgAll,
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
           child: Row(
             children: [
-              Icon(_kindIcon(task.kind), color: cs.primary),
-              const SizedBox(width: 12),
+              Icon(kindIcon(task.kind), color: cs.primary),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,28 +68,27 @@ class TaskTile extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             task.title,
-                            style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  decoration:
-                                      progress.status == TaskStatus.completed
-                                      ? TextDecoration.lineThrough
-                                      : null,
-                                ),
+                            style: ts.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              decoration:
+                                  progress.status == TaskStatus.completed
+                                  ? TextDecoration.lineThrough
+                                  : null,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         if (hasLink)
                           Container(
-                            margin: const EdgeInsets.only(left: 6),
+                            margin: const EdgeInsets.only(left: AppSpacing.sm),
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
+                              horizontal: AppSpacing.sm,
+                              vertical: AppSpacing.xs,
                             ),
                             decoration: BoxDecoration(
                               color: cs.secondaryContainer,
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(AppRadius.md),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -126,11 +98,10 @@ class TaskTile extends ConsumerWidget {
                                   size: 12,
                                   color: cs.onSecondaryContainer,
                                 ),
-                                const SizedBox(width: 2),
+                                const SizedBox(width: AppSpacing.xs),
                                 Text(
                                   '${progress.linkedActivitiesCount}',
-                                  style: TextStyle(
-                                    fontSize: 11,
+                                  style: ts.labelSmall?.copyWith(
                                     color: cs.onSecondaryContainer,
                                   ),
                                 ),
@@ -139,50 +110,48 @@ class TaskTile extends ConsumerWidget {
                           ),
                       ],
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       subtitle,
-                      style: Theme.of(context).textTheme.bodySmall
-                          ?.copyWith(color: cs.onSurfaceVariant),
+                      style: ts.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (task.estimatedMinutes != null) ...[
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpacing.xs),
                       Text(
                         'Estimado: ${(task.estimatedMinutes! / 60).toStringAsFixed(1)} h',
-                        style: Theme.of(context).textTheme.labelSmall
-                            ?.copyWith(color: cs.onSurfaceVariant),
+                        style: ts.labelSmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
                       ),
                     ],
                     if (progress.linkedActivitiesCount > 0 &&
                         progress.totalPlannedSessions > 0) ...[
-                      const SizedBox(height: 6),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: progress.completionRatio,
-                          minHeight: 4,
-                          backgroundColor: cs.surfaceContainerHighest,
-                        ),
+                      const SizedBox(height: AppSpacing.sm),
+                      AppProgressBar(
+                        value: progress.completionRatio,
+                        minHeight: 4,
                       ),
                     ],
                   ],
                 ),
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: AppSpacing.sm),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
+                ),
                 decoration: BoxDecoration(
                   color: hasLink
                       ? cs.primaryContainer
                       : cs.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 child: Text(
-                  _kindLabel(task.kind),
-                  style: TextStyle(
-                    fontSize: 11,
+                  kindLabel(task.kind),
+                  style: ts.labelSmall?.copyWith(
                     color: hasLink
                         ? cs.onPrimaryContainer
                         : cs.onSurfaceVariant,
@@ -196,7 +165,7 @@ class TaskTile extends ConsumerWidget {
                       : Icons.circle_outlined,
                   size: 22,
                   color: progress.status == TaskStatus.completed
-                      ? cs.primary
+                      ? AppColors.success
                       : cs.onSurfaceVariant,
                 ),
                 tooltip: progress.status == TaskStatus.completed

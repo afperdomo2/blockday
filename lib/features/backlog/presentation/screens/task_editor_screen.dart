@@ -3,48 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radius.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
 import '../../domain/task.dart';
 import '../../providers/tasks_providers.dart';
-
-String _kindLabel(TaskKind k) {
-  switch (k) {
-    case TaskKind.task:
-      return 'Tarea';
-    case TaskKind.learning:
-      return 'Curso';
-    case TaskKind.note:
-      return 'Nota';
-    case TaskKind.project:
-      return 'Proyecto';
-  }
-}
-
-IconData _kindIcon(TaskKind k) {
-  switch (k) {
-    case TaskKind.task:
-      return Icons.check_circle_outline;
-    case TaskKind.learning:
-      return Icons.school_outlined;
-    case TaskKind.note:
-      return Icons.note_outlined;
-    case TaskKind.project:
-      return Icons.folder_outlined;
-  }
-}
-
-String _statusLabel(TaskStatus s) {
-  switch (s) {
-    case TaskStatus.pending:
-      return 'Sin programar';
-    case TaskStatus.scheduled:
-      return 'Programada';
-    case TaskStatus.inProgress:
-      return 'En progreso';
-    case TaskStatus.completed:
-      return 'Hecha';
-  }
-}
+import '../task_labels.dart';
 
 class TaskEditorScreen extends ConsumerStatefulWidget {
   const TaskEditorScreen({super.key, this.taskId});
@@ -313,9 +277,9 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                       value: k,
                       child: Row(
                         children: [
-                          Icon(_kindIcon(k), size: 20),
+                          Icon(kindIcon(k), size: 20),
                           const SizedBox(width: 8),
-                          Text(_kindLabel(k)),
+                          Text(kindLabel(k)),
                         ],
                       ),
                     ),
@@ -328,7 +292,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppRadius.md),
                 border: Border.all(
                   color: Theme.of(context).colorScheme.outlineVariant,
                 ),
@@ -339,7 +303,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                     isCompleted ? Icons.check_circle : Icons.hourglass_empty,
                     size: 18,
                     color: isCompleted
-                        ? Theme.of(context).colorScheme.primary
+                        ? AppColors.success
                         : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 8),
@@ -348,7 +312,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Estado: ${_statusLabel(derivedStatus)}',
+                          'Estado: ${statusLabel(derivedStatus)}',
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                         Text(

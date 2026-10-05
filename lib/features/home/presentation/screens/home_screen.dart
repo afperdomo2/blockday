@@ -3,7 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/activity_colors.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/date_format.dart';
+import '../../../../shared/widgets/app_progress_bar.dart';
+import '../../../../shared/widgets/section_header.dart';
 import '../../../activities/domain/occurrence.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
 import '../../../backlog/domain/task.dart';
@@ -37,15 +41,20 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Inicio'), centerTitle: false),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.sm,
+          AppSpacing.lg,
+          AppSpacing.jumbo * 2,
+        ),
         children: [
           _TodayHeader(date: today),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           _QuickActions(today: today),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           _WeekSummary(progress: weekly),
-          const SizedBox(height: 20),
-          _SectionHeader(
+          const SizedBox(height: AppSpacing.xl),
+          SectionHeader(
             title: 'Programado hoy',
             count: todayOccurrences.length,
           ),
@@ -53,16 +62,16 @@ class HomeScreen extends ConsumerWidget {
             const _EmptyText('Sin actividades hoy')
           else
             ...todayOccurrences.map((o) => _OccurrenceTile(occurrence: o)),
-          const SizedBox(height: 20),
-          _SectionHeader(title: 'Próximos', count: upcoming.length),
+          const SizedBox(height: AppSpacing.xl),
+          SectionHeader(title: 'Próximos', count: upcoming.length),
           if (upcoming.isEmpty)
             const _EmptyText('Sin eventos en los próximos días')
           else
             ...upcoming
                 .take(8)
                 .map((o) => _OccurrenceTile(occurrence: o, showDate: true)),
-          const SizedBox(height: 20),
-          _SectionHeader(
+          const SizedBox(height: AppSpacing.xl),
+          SectionHeader(
             title: 'Tareas sin programar',
             count: pendingTasks.length,
           ),
@@ -98,7 +107,7 @@ class _TodayHeader extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: AppSpacing.xxs),
         Text(
           formatDayHeader(date),
           style: theme.textTheme.titleMedium?.copyWith(
@@ -128,7 +137,7 @@ class _QuickActions extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: FilledButton.tonalIcon(
             icon: const Icon(Icons.playlist_add),
@@ -157,74 +166,31 @@ class _WeekSummary extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Icon(Icons.insights, size: 18, color: cs.primary),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   'Resumen semanal',
                   style: ts.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             Text(
               planned == 0
                   ? 'Sin sesiones programadas esta semana'
                   : '$shown de $planned sesiones completadas',
               style: ts.titleMedium,
             ),
-            const SizedBox(height: 10),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: ratio,
-                minHeight: 6,
-                backgroundColor: cs.surfaceContainerHighest,
-              ),
-            ),
+            const SizedBox(height: AppSpacing.sm),
+            AppProgressBar(value: ratio),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, required this.count});
-
-  final String title;
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final ts = Theme.of(context).textTheme;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        children: [
-          Text(
-            title,
-            style: ts.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
-            decoration: BoxDecoration(
-              color: cs.secondaryContainer,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              '$count',
-              style: ts.labelSmall?.copyWith(color: cs.onSecondaryContainer),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -246,23 +212,29 @@ class _OccurrenceTile extends StatelessWidget {
         : formatHourRange(occurrence.start, occurrence.end);
 
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4),
+      margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadius.lgAll,
         onTap: () => context.go('/activity/${occurrence.activityId}?from=/'),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
           child: Row(
             children: [
               Container(
                 width: 12,
                 height: 12,
                 decoration: BoxDecoration(
-                  color: activityColor(occurrence.color),
+                  color: ActivityColors.of(
+                    occurrence.color,
+                    Theme.of(context).brightness,
+                  ).background,
                   shape: BoxShape.circle,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -275,7 +247,7 @@ class _OccurrenceTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.xxs),
                     Text(
                       time,
                       style: ts.bodySmall?.copyWith(color: cs.onSurfaceVariant),
@@ -301,7 +273,10 @@ class _EmptyText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.sm,
+        horizontal: AppSpacing.xs,
+      ),
       child: Text(
         text,
         style: Theme.of(context).textTheme.bodyMedium

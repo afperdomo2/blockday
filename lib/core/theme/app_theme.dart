@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
 
-class AppTheme {
-  const AppTheme._();
+import 'app_colors.dart';
+import 'app_radius.dart';
+import 'app_typography.dart';
 
-  static const Color seedColor = Color(0xFF3F51B5);
+abstract final class AppTheme {
+  AppTheme._();
 
   static ThemeData get light => _build(Brightness.light);
 
   static ThemeData get dark => _build(Brightness.dark);
 
   static ThemeData _build(Brightness brightness) {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: seedColor,
-      brightness: brightness,
-    );
+    final scheme = buildAppColorScheme(brightness);
+    final textTheme = AppTypography.build(brightness)
+        .apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
+
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
+      fontFamily: AppTypography.fontFamily,
+      textTheme: textTheme,
       visualDensity: VisualDensity.adaptivePlatformDensity,
       scaffoldBackgroundColor: scheme.surface,
       appBarTheme: AppBarTheme(
@@ -28,44 +32,76 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
       ),
       cardTheme: CardThemeData(
-        elevation: 1,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 0,
+        color: scheme.surfaceContainerLow,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+        ),
       ),
-      textTheme: _textTheme(scheme, brightness),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: scheme.surface.withValues(alpha: 0.9),
+        indicatorColor: scheme.secondaryContainer,
+        height: 72,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       ),
       chipTheme: ChipThemeData(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+        side: BorderSide(color: scheme.outlineVariant),
       ),
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: ButtonStyle(visualDensity: VisualDensity.compact),
       ),
-    );
-  }
-
-  static TextTheme _textTheme(ColorScheme scheme, Brightness brightness) {
-    final base = brightness == Brightness.light
-        ? Typography.blackMountainView
-        : Typography.whiteMountainView;
-    return base.copyWith(
-      displayLarge: base.displayLarge?.copyWith(
-        letterSpacing: -0.02 * 57,
-        height: 1.05,
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
       ),
-      titleLarge: base.titleLarge?.copyWith(
-        letterSpacing: -0.01 * 22,
-        height: 1.1,
+      dividerTheme: DividerThemeData(
+        color: scheme.outlineVariant,
+        space: 1,
+        thickness: 1,
       ),
-      titleMedium: base.titleMedium?.copyWith(
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.01 * 16,
+      snackBarTheme: const SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
       ),
-      labelSmall: base.labelSmall?.copyWith(
-        letterSpacing: 0.05 * 11,
-        height: 1.4,
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: scheme.primary,
+        linearTrackColor: scheme.surfaceContainerHighest,
       ),
-      bodyMedium: base.bodyMedium?.copyWith(height: 1.5),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+          ),
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+        ),
+      ),
+      dialogTheme: DialogThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+        ),
+      ),
     );
   }
 }

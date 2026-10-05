@@ -70,6 +70,11 @@ flutter test --coverage && dart pub global activate coverage  # cobertura (opcio
   (`lib/features/activities/domain/`), nunca dentro de widgets.
 - Strings de UI en español; resto del código en inglés.
 - Seguir `analysis_options.yaml` (flutter_lints).
+- UI: usar **tokens de diseño** de `lib/core/theme/` (colores, spacing, radius,
+  tipografía, motion) y leer `design-system/blockday/MASTER.md` antes de tocar
+  cualquier pantalla/componente. Nada de hex/spacing/radius/fontSize crudos en
+  widgets; respetar `MediaQuery.disableAnimations` (reduced motion) y targets
+  táctiles >= 48dp.
 
 ## Tests
 
@@ -84,7 +89,7 @@ flutter test --coverage && dart pub global activate coverage  # cobertura (opcio
 
 | Tarea | Skill |
 |---|---|
-| UI/UX, gestos, motion, materiales, tipografía | `apple-design` |
+| UI/UX, sistema de diseño, accesibilidad, motion | `ui-ux-pro-max` (ver `design-system/blockday/MASTER.md`) |
 | Implementar animaciones en Flutter | `flutter-animations` |
 | Arquitectura, Riverpod, GoRouter, widgets, rendimiento | `flutter-expert` (ver `references/`) |
 | Estilo y buenas prácticas de Dart | `dart-best-practices` |

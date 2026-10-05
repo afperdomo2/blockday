@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/activity_colors.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/utils/date_format.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
 
 class MonthView extends ConsumerWidget {
@@ -60,8 +62,8 @@ class MonthView extends ConsumerWidget {
                 return const SizedBox.shrink();
               }
               final date = DateTime(year, month, dayIndex);
-              final isToday = _isSameDay(date, DateTime.now());
-              final isSelected = _isSameDay(date, selectedDate);
+              final isToday = isSameDay(date, DateTime.now());
+              final isSelected = isSameDay(date, selectedDate);
               final count = countByDay[date] ?? 0;
               final colors = colorsByDay[date] ?? const [];
               return GestureDetector(
@@ -77,7 +79,7 @@ class MonthView extends ConsumerWidget {
                         ? Theme.of(context).colorScheme.secondaryContainer
                               .withValues(alpha: 0.5)
                         : null,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                     border: isToday
                         ? Border.all(
                             color: Theme.of(context).colorScheme.primary,
@@ -105,7 +107,10 @@ class MonthView extends ConsumerWidget {
                               width: 6,
                               height: 6,
                               decoration: BoxDecoration(
-                                color: activityColor(c),
+                                color: ActivityColors.of(
+                                  c,
+                                  Theme.of(context).brightness,
+                                ).background,
                                 shape: BoxShape.circle,
                               ),
                             );
@@ -114,8 +119,7 @@ class MonthView extends ConsumerWidget {
                         if (count > 3)
                           Text(
                             '+${count - 3}',
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(fontSize: 9),
+                            style: Theme.of(context).textTheme.labelSmall,
                           ),
                       ],
                     ],
@@ -152,6 +156,3 @@ class _WeekdayHeader extends StatelessWidget {
     );
   }
 }
-
-bool _isSameDay(DateTime a, DateTime b) =>
-    a.year == b.year && a.month == b.month && a.day == b.day;

@@ -1,18 +1,53 @@
 import 'package:flutter/material.dart';
 
-const List<Color> activityPalette = <Color>[
-  Color(0xFF039BE5),
-  Color(0xFF3F51B5),
-  Color(0xFF7986CB),
-  Color(0xFF8E24AA),
-  Color(0xFFD50000),
-  Color(0xFFE67C73),
-  Color(0xFFF4511E),
-  Color(0xFFF6BF26),
-  Color(0xFF7CB342),
-  Color(0xFF0B8043),
-  Color(0xFF616161),
-];
+/// An activity category color pair: a background and its readable foreground.
+class ActivityColor {
+  const ActivityColor(this.background, this.foreground);
 
-Color activityColor(int index) =>
-    activityPalette[index % activityPalette.length];
+  final Color background;
+  final Color foreground;
+}
+
+/// Activity category palette (event category accent colors).
+///
+/// Foregrounds are contrast-checked against their background (>= 4.5:1 for
+/// normal text). Dark mode uses desaturated/lighter tonal variants.
+/// Source of truth: `design-system/blockday/MASTER.md`.
+abstract final class ActivityColors {
+  ActivityColors._();
+
+  static const List<ActivityColor> light = <ActivityColor>[
+    ActivityColor(Color(0xFF1565C0), Colors.white),
+    ActivityColor(Color(0xFF0277BD), Colors.white),
+    ActivityColor(Color(0xFF3949AB), Colors.white),
+    ActivityColor(Color(0xFF6A1B9A), Colors.white),
+    ActivityColor(Color(0xFFAD1457), Colors.white),
+    ActivityColor(Color(0xFFC62828), Colors.white),
+    ActivityColor(Color(0xFFE65100), Colors.white),
+    ActivityColor(Color(0xFFF9A825), Colors.black87),
+    ActivityColor(Color(0xFF2E7D32), Colors.white),
+    ActivityColor(Color(0xFF00695C), Colors.white),
+    ActivityColor(Color(0xFF455A64), Colors.white),
+  ];
+
+  static const List<ActivityColor> dark = <ActivityColor>[
+    ActivityColor(Color(0xFF64B5F6), Colors.black87),
+    ActivityColor(Color(0xFF4FC3F7), Colors.black87),
+    ActivityColor(Color(0xFF7986CB), Colors.black87),
+    ActivityColor(Color(0xFFBA68C8), Colors.black87),
+    ActivityColor(Color(0xFFF06292), Colors.black87),
+    ActivityColor(Color(0xFFE57373), Colors.black87),
+    ActivityColor(Color(0xFFFF8A65), Colors.black87),
+    ActivityColor(Color(0xFFFFD54F), Colors.black87),
+    ActivityColor(Color(0xFF81C784), Colors.black87),
+    ActivityColor(Color(0xFF4DB6AC), Colors.black87),
+    ActivityColor(Color(0xFF90A4AE), Colors.black87),
+  ];
+
+  static int get length => light.length;
+
+  static ActivityColor of(int index, Brightness brightness) {
+    final palette = brightness == Brightness.dark ? dark : light;
+    return palette[index % palette.length];
+  }
+}

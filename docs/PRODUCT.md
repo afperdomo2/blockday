@@ -50,8 +50,8 @@ bloques recurrentes (rutinas) + eventos puntuales (citas, cursos).
 - Abrir la app → vista día de hoy con los bloques ya colocados.
 - Crear actividad en ≤ 3 toques/clics: título, hora, días de repetición.
 - Navegación por gestos (swipe entre días/semanas) y botones de navegación.
-- UI fluida: springs, feedback inmediato, materiales translúcidos
-  (ver skill `apple-design`).
+- UI fluida: springs, feedback inmediato y tokens de diseño definidos en
+  `design-system/blockday/MASTER.md` (ver skill `ui-ux-pro-max`).
 
 ## Métricas de éxito (v1)
 

@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/activity_colors.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/date_format.dart';
 import '../../../activities/domain/occurrence.dart';
 import '../../../activities/domain/overlap_layout.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
@@ -112,7 +115,6 @@ class _WeekViewState extends ConsumerState<WeekView> {
                                             ?.copyWith(
                                               color:
                                                   colorScheme.onSurfaceVariant,
-                                              fontSize: 10,
                                             ),
                                       ),
                                     ),
@@ -123,9 +125,9 @@ class _WeekViewState extends ConsumerState<WeekView> {
                           ),
                           ...weekDays.map((day) {
                             final dayOcc = occurrences
-                                .where((o) => _isSameDay(o.date, day))
+                                .where((o) => isSameDay(o.date, day))
                                 .toList();
-                            final isToday = _isSameDay(day, DateTime.now());
+                            final isToday = isSameDay(day, DateTime.now());
                             return Expanded(
                               child: Container(
                                 decoration: BoxDecoration(
@@ -286,7 +288,7 @@ class _WeekHeader extends StatelessWidget {
         children: [
           const SizedBox(width: 48),
           ...weekDays.map((d) {
-            final isToday = _isSameDay(d, now);
+            final isToday = isSameDay(d, now);
             return Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 6),
@@ -294,7 +296,7 @@ class _WeekHeader extends StatelessWidget {
                   color: isToday
                       ? Theme.of(context).colorScheme.primaryContainer
                       : null,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
                 child: Column(
@@ -334,10 +336,12 @@ class _WeekBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = activityColor(occurrence.color);
-    final fg = ThemeData.estimateBrightnessForColor(bg) == Brightness.dark
-        ? Colors.white
-        : Colors.black87;
+    final ac = ActivityColors.of(
+      occurrence.color,
+      Theme.of(context).brightness,
+    );
+    final bg = ac.background;
+    final fg = ac.foreground;
     final isLinked = occurrence.isLinkedToTask;
     return GestureDetector(
       onTap: () =>
@@ -345,25 +349,28 @@ class _WeekBlock extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: bg,
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(AppRadius.sm),
         ),
-        padding: EdgeInsets.symmetric(horizontal: compact ? 2 : 4, vertical: 2),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xs,
+          vertical: AppSpacing.xs,
+        ),
         child: Row(
           children: [
             Expanded(
               child: Text(
                 occurrence.title,
-                style: TextStyle(
-                  color: fg,
-                  fontSize: compact ? 9 : 10,
-                  fontWeight: FontWeight.w600,
-                ),
+                style:
+                    (compact
+                            ? Theme.of(context).textTheme.labelSmall
+                            : Theme.of(context).textTheme.labelMedium)
+                        ?.copyWith(color: fg, fontWeight: FontWeight.w600),
                 maxLines: compact ? 3 : 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             if (isLinked && !compact) ...[
-              const SizedBox(width: 2),
+              const SizedBox(width: AppSpacing.xs),
               Icon(Icons.link, size: 10, color: fg.withValues(alpha: 0.9)),
             ],
           ],
@@ -372,6 +379,3 @@ class _WeekBlock extends StatelessWidget {
     );
   }
 }
-
-bool _isSameDay(DateTime a, DateTime b) =>
-    a.year == b.year && a.month == b.month && a.day == b.day;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_motion.dart';
 import '../../../../core/utils/date_format.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
 import '../../providers/calendar_state.dart';
@@ -19,7 +20,7 @@ class CalendarScreen extends ConsumerWidget {
     final view = calendarState.view;
     final occurrences = ref.watch(dayOccurrencesProvider(selectedDate));
     final activitiesAsync = ref.watch(activitiesStreamProvider);
-    final isToday = _isSameDay(selectedDate, DateTime.now());
+    final isToday = isSameDay(selectedDate, DateTime.now());
 
     void navigatePrev() {
       final notifier = ref.read(calendarStateProvider.notifier);
@@ -94,9 +95,11 @@ class CalendarScreen extends ConsumerWidget {
           ),
           Expanded(
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
+              duration: AppMotion.reduceMotion(context)
+                  ? Duration.zero
+                  : AppMotion.base,
+              switchInCurve: AppMotion.enter,
+              switchOutCurve: AppMotion.exit,
               child: activitiesAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Center(child: Text('Error: $e')),
@@ -199,6 +202,3 @@ class _DateChip extends StatelessWidget {
     );
   }
 }
-
-bool _isSameDay(DateTime a, DateTime b) =>
-    a.year == b.year && a.month == b.month && a.day == b.day;

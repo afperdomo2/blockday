@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/theme/activity_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../../backlog/providers/tasks_providers.dart';
 import '../../domain/activity.dart';
 import '../../domain/recurrence_end.dart';
@@ -481,7 +482,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
               ),
             if (_saving)
               const Padding(
-                padding: EdgeInsets.all(16),
+                padding: EdgeInsets.all(AppSpacing.lg),
                 child: SizedBox(
                   width: 20,
                   height: 20,
@@ -495,7 +496,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
         body: Form(
           key: _formKey,
           child: ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             children: [
               TextFormField(
                 controller: _titleCtrl,
@@ -507,7 +508,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
                     ? 'El título es obligatorio'
                     : null,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               TextFormField(
                 controller: _notesCtrl,
                 decoration: const InputDecoration(
@@ -516,46 +517,49 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
                 ),
                 maxLines: 3,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               Text('Color', style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Wrap(
-                spacing: 8,
-                children: List.generate(activityPalette.length, (i) {
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: List.generate(ActivityColors.length, (i) {
                   final selected = _color == i;
-                  return GestureDetector(
-                    onTap: () => setState(() => _color = i),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: activityPalette[i],
-                        shape: BoxShape.circle,
-                        border: selected
-                            ? Border.all(
-                                color: Theme.of(context).colorScheme.primary,
-                                width: 3,
-                              )
+                  final ac = ActivityColors.light[i];
+                  return Semantics(
+                    label: 'Color ${i + 1}',
+                    button: true,
+                    selected: selected,
+                    child: GestureDetector(
+                      onTap: () => setState(() => _color = i),
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: ac.background,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: selected
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.outlineVariant,
+                            width: selected ? 3 : 1,
+                          ),
+                        ),
+                        child: selected
+                            ? Icon(Icons.check, size: 20, color: ac.foreground)
                             : null,
                       ),
-                      child: selected
-                          ? const Icon(
-                              Icons.check,
-                              size: 18,
-                              color: Colors.white,
-                            )
-                          : null,
                     ),
                   );
                 }),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               _TaskLinkTile(
                 taskId: _taskId,
                 onPick: _pickTask,
                 onClear: () => setState(() => _taskId = null),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               SegmentedButton<_EditorMode>(
                 segments: const [
                   ButtonSegment(
@@ -572,7 +576,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
                 selected: {_mode},
                 onSelectionChanged: (s) => setState(() => _mode = s.first),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               if (_mode == _EditorMode.single) ...[
                 ListTile(
                   contentPadding: EdgeInsets.zero,
@@ -639,14 +643,14 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   'Días de la semana',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Wrap(
-                  spacing: 8,
+                  spacing: AppSpacing.sm,
                   children: _weekdayLabels.entries.map((e) {
                     final selected = _weekdays.contains(e.key);
                     return FilterChip(
@@ -674,7 +678,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
                     (d) => setState(() => _firstDate = d),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Text('Termina', style: Theme.of(context).textTheme.titleSmall),
                 RadioGroup<_EndCondition>(
                   groupValue: _endCondition,
