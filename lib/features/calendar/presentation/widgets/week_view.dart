@@ -149,7 +149,7 @@ class _WeekViewState extends ConsumerState<WeekView> {
                                         .clamp(0, 23)
                                         .toInt();
                                     context.go(
-                                      '/activity/new?date=${day.toIso8601String()}&hour=$h',
+                                      '/activity/new?date=${day.toIso8601String()}&hour=$h&from=/calendar',
                                     );
                                   },
                                   child: Stack(
@@ -309,7 +309,8 @@ class _WeekBlock extends StatelessWidget {
         : Colors.black87;
     final isLinked = occurrence.isLinkedToTask;
     return GestureDetector(
-      onTap: () => context.go('/activity/${occurrence.activityId}'),
+      onTap: () =>
+          context.go('/activity/${occurrence.activityId}?from=/calendar'),
       child: Container(
         decoration: BoxDecoration(
           color: bg,

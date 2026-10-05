@@ -65,8 +65,9 @@ class MonthView extends ConsumerWidget {
               final count = countByDay[date] ?? 0;
               final colors = colorsByDay[date] ?? const [];
               return GestureDetector(
-                onTap: () =>
-                    context.go('/activity/new?date=${date.toIso8601String()}'),
+                onTap: () => context.go(
+                  '/activity/new?date=${date.toIso8601String()}&from=/calendar',
+                ),
                 child: Container(
                   margin: const EdgeInsets.all(2),
                   decoration: BoxDecoration(

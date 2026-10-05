@@ -123,10 +123,11 @@ class CalendarScreen extends ConsumerWidget {
                             date: selectedDate,
                             occurrences: const [],
                             onEmptyTap: (h, m) => context.go(
-                              '/activity/new?date=${selectedDate.toIso8601String()}&hour=$h',
+                              '/activity/new?date=${selectedDate.toIso8601String()}&hour=$h&from=/calendar',
                             ),
-                            onBlockTap: (occ) =>
-                                context.go('/activity/${occ.activityId}'),
+                            onBlockTap: (occ) => context.go(
+                              '/activity/${occ.activityId}?from=/calendar',
+                            ),
                           ),
                         ),
                         Padding(
@@ -153,10 +154,11 @@ class CalendarScreen extends ConsumerWidget {
                           date: selectedDate,
                           occurrences: occurrences,
                           onEmptyTap: (h, m) => context.go(
-                            '/activity/new?date=${selectedDate.toIso8601String()}&hour=$h',
+                            '/activity/new?date=${selectedDate.toIso8601String()}&hour=$h&from=/calendar',
                           ),
-                          onBlockTap: (occ) =>
-                              context.go('/activity/${occ.activityId}'),
+                          onBlockTap: (occ) => context.go(
+                            '/activity/${occ.activityId}?from=/calendar',
+                          ),
                         ),
                       ),
                     ],
@@ -169,8 +171,9 @@ class CalendarScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'calendar-fab',
-        onPressed: () =>
-            context.go('/activity/new?date=${selectedDate.toIso8601String()}'),
+        onPressed: () => context.go(
+          '/activity/new?date=${selectedDate.toIso8601String()}&from=/calendar',
+        ),
         icon: const Icon(Icons.add),
         label: const Text('Nueva'),
       ),

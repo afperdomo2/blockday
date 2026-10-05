@@ -108,9 +108,70 @@ en verde (ver AGENTS.md).
 - [ ] Markdown en notas (campo `notes` ya preparado, render deferido)
 - [ ] Animaciones avanzadas según `apple-design` para Backlog (staggered list)
 
-## Fase 2 (fuera de v1)
+## Hito 15 — Fix de navegación post-editor
 
-- [ ] Recordatorios con `flutter_local_notifications` (timezone, permisos
-      Android, canal de notificaciones Windows)
-- [ ] Búsqueda de actividades/tareas
-- [ ] Exportar/importar datos
+- [x] Guardar/eliminar actividad vuelve al calendario (no a `/` vacío)
+- [x] Decidir retorno: se adopta recordar origen vía query param `from`,
+      con default `/calendar` (whitelist `/`, `/calendar`, `/backlog/**`)
+- [x] Widget test del editor verificando la ruta de retorno
+      (default, desde backlog y en modo edición)
+
+## Hito 16 — Dashboard "Inicio"
+
+- [ ] Reemplazar `HomeScreen` vacío (`SizedBox.shrink`) por un dashboard real
+- [ ] Cabecera "Hoy" + fecha
+- [ ] Bloques de hoy (`dayOccurrencesProvider(today)`)
+- [ ] Próximos (N días siguientes)
+- [ ] Tareas sin programar (captura rápida)
+- [ ] Resumen semanal (X/Y sesiones) reutilizando `taskProgressProvider`
+- [ ] Botones rápidos: nueva actividad / nueva tarea
+- [ ] Widget tests (estado vacío y con datos)
+
+## Hito 17 — Solapamientos lado a lado
+
+- [ ] Lógica pura de layout: agrupar ocurrencias que se pisan + asignar
+      columnas
+- [ ] Aplicar en `time_grid.dart` (día) y `week_view.dart`
+- [ ] Tests unitarios de layout (0, 2, 3+ solapes, encadenados, bordes)
+
+## Hito 18 — Drag crear/redimensionar
+
+- [ ] Drag en hueco crea bloque; drag en bordes redimensiona
+- [ ] Feedback visual + precarga del editor con el rango arrastrado
+- [ ] Widget tests de los gestos críticos
+
+## Hito 19 — Pantalla de ajustes
+
+- [ ] Preferencias persistentes (inicio de semana, modo de tema, formato
+      12/24h)
+- [ ] Decidir almacenamiento: `shared_preferences` vs tabla Drift
+- [ ] Ruta `/settings` + entrada desde el shell
+- [ ] Widget tests
+
+## Hito 20 — Búsqueda global
+
+- [ ] Buscar actividades + tareas en una vista de resultados
+- [ ] Centralizar/reutilizar el buscador del backlog
+- [ ] Tests de filtrado
+
+## Hito 21 — Backup export/import JSON
+
+- [ ] Serializar tasks, activities, exclusions y sessions a JSON
+- [ ] Exportar a archivo (file picker/sharing) + importar con validación
+- [ ] Tests round-trip export→import sin pérdida de datos
+
+## Hito 22 — Notificaciones/recordatorios
+
+- [ ] Añadir `flutter_local_notifications` + `timezone`
+- [ ] Migración schema 2→3: campo recordatorio por actividad
+      (o recordatorio global por defecto)
+- [ ] Programar/cancelar notificaciones al guardar/eliminar
+- [ ] Permisos Android + canal de notificaciones Windows
+- [ ] Tests de la lógica de programación (tiempo de disparo)
+
+## Fase 3 (futuro, no programado)
+
+- [ ] Sincronización en la nube / multi-dispositivo
+- [ ] Invitados, ubicaciones, videollamadas
+- [ ] Eventos de día completo / multi-día
+- [ ] iOS / Web

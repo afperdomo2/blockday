@@ -57,6 +57,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
   bool _loaded = false;
   bool _saving = false;
   bool _taskPrefilled = false;
+  String _returnTo = '/calendar';
 
   @override
   void initState() {
@@ -65,8 +66,9 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
   }
 
   void _initFromQuery() {
-    if (widget.activityId != null) return;
     final state = GoRouterState.of(context);
+    _returnTo = _sanitizeReturn(state.uri.queryParameters['from']);
+    if (widget.activityId != null) return;
     final dateStr = state.uri.queryParameters['date'];
     final hourStr = state.uri.queryParameters['hour'];
     final taskIdParam = state.uri.queryParameters['taskId'];
@@ -94,6 +96,17 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
       _taskId = taskIdParam;
       _prefillFromTask(taskIdParam);
     }
+  }
+
+  String _sanitizeReturn(String? from) {
+    if (from == null || from.isEmpty) return '/calendar';
+    if (from == '/' ||
+        from == '/calendar' ||
+        from == '/backlog' ||
+        from.startsWith('/backlog/')) {
+      return from;
+    }
+    return '/calendar';
   }
 
   Future<void> _prefillFromTask(String taskId) async {
@@ -344,7 +357,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
 
     try {
       await ref.read(activitiesRepositoryProvider).save(activity);
-      if (mounted) context.go('/');
+      if (mounted) context.go(_returnTo);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -379,11 +392,11 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
     );
     if (confirm != true) return;
     await ref.read(activitiesRepositoryProvider).delete(id);
-    if (mounted) context.go('/');
+    if (mounted) context.go(_returnTo);
   }
 
-  void _goHome() {
-    if (mounted) context.go('/');
+  void _closeEditor() {
+    if (mounted) context.go(_returnTo);
   }
 
   @override
@@ -398,14 +411,14 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
         loading: () => PopScope(
           canPop: false,
           onPopInvokedWithResult: (didPop, _) {
-            if (!didPop) _goHome();
+            if (!didPop) _closeEditor();
           },
           child: Scaffold(
             appBar: AppBar(
               title: const Text('Cargando...'),
               leading: IconButton(
                 icon: const Icon(Icons.close),
-                onPressed: _goHome,
+                onPressed: _closeEditor,
               ),
             ),
             body: const Center(child: CircularProgressIndicator()),
@@ -414,14 +427,14 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
         error: (e, _) => PopScope(
           canPop: false,
           onPopInvokedWithResult: (didPop, _) {
-            if (!didPop) _goHome();
+            if (!didPop) _closeEditor();
           },
           child: Scaffold(
             appBar: AppBar(
               title: const Text('Error'),
               leading: IconButton(
                 icon: const Icon(Icons.close),
-                onPressed: _goHome,
+                onPressed: _closeEditor,
               ),
             ),
             body: Center(child: Text('Error: $e')),
@@ -449,7 +462,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _goHome();
+        if (!didPop) _closeEditor();
       },
       child: Scaffold(
         appBar: AppBar(
@@ -457,7 +470,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
           leading: IconButton(
             icon: const Icon(Icons.close),
             tooltip: 'Cerrar',
-            onPressed: _goHome,
+            onPressed: _closeEditor,
           ),
           actions: [
             if (isEditing)

@@ -434,8 +434,12 @@ class _LinkedActivitiesSection extends ConsumerWidget {
                   ),
             trailing: FilledButton.tonal(
               onPressed: hasLink && linkedActivity != null
-                  ? () => context.go('/activity/${linkedActivity.id}')
-                  : () => context.go('/activity/new?taskId=$taskId'),
+                  ? () => context.go(
+                      '/activity/${linkedActivity.id}?from=/backlog/task/$taskId',
+                    )
+                  : () => context.go(
+                      '/activity/new?taskId=$taskId&from=/backlog/task/$taskId',
+                    ),
               child: Text(hasLink ? 'Ver' : 'Programar'),
             ),
           ),
