@@ -10,11 +10,13 @@ import '../../../../core/utils/date_format.dart';
 import '../../../../shared/widgets/about_dialog.dart';
 import '../../../../shared/widgets/app_progress_bar.dart';
 import '../../../../shared/widgets/section_header.dart';
+import '../../../../shared/widgets/settings_action.dart';
 import '../../../activities/domain/occurrence.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
 import '../../../backlog/domain/task.dart';
 import '../../../backlog/presentation/widgets/task_tile.dart';
 import '../../../backlog/providers/tasks_providers.dart';
+import '../../../settings/providers/settings_providers.dart';
 import '../../providers/home_providers.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -45,6 +47,7 @@ class HomeScreen extends ConsumerWidget {
         title: const Text('Inicio'),
         centerTitle: false,
         actions: [
+          const SettingsAction(),
           IconButton(
             tooltip: 'Acerca de',
             icon: const Icon(Icons.info_outline),
@@ -211,20 +214,21 @@ class _WeekSummary extends StatelessWidget {
   }
 }
 
-class _OccurrenceTile extends StatelessWidget {
+class _OccurrenceTile extends ConsumerWidget {
   const _OccurrenceTile({required this.occurrence, this.showDate = false});
 
   final Occurrence occurrence;
   final bool showDate;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final ts = Theme.of(context).textTheme;
+    final use24 = ref.watch(currentSettingsProvider).use24HourFormat;
     final time = showDate
         ? '${formatDayShort(occurrence.date)} · '
-              '${formatHourRange(occurrence.start, occurrence.end)}'
-        : formatHourRange(occurrence.start, occurrence.end);
+              '${formatHourRange(occurrence.start, occurrence.end, use24Hour: use24)}'
+        : formatHourRange(occurrence.start, occurrence.end, use24Hour: use24);
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),

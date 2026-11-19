@@ -5,6 +5,7 @@ import '../features/backlog/presentation/screens/backlog_screen.dart';
 import '../features/backlog/presentation/screens/task_editor_screen.dart';
 import '../features/calendar/presentation/screens/calendar_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
+import '../features/settings/presentation/screens/settings_screen.dart';
 import 'main_shell.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -54,6 +55,10 @@ final GoRouter appRouter = GoRouter(
       path: '/activity/:id',
       builder: (context, state) =>
           ActivityEditorScreen(activityId: state.pathParameters['id']),
+    ),
+    GoRoute(
+      path: '/settings',
+      builder: (context, state) => const SettingsScreen(),
     ),
   ],
 );

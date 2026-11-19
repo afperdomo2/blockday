@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/date_format.dart';
 import '../../../activities/domain/occurrence.dart';
+import '../../../settings/providers/settings_providers.dart';
 import 'time_grid_column.dart';
 
-class TimeGrid extends StatefulWidget {
+class TimeGrid extends ConsumerStatefulWidget {
   const TimeGrid({
     super.key,
     required this.date,
@@ -29,10 +31,10 @@ class TimeGrid extends StatefulWidget {
   static const double totalHeight = 24 * hourHeight;
 
   @override
-  State<TimeGrid> createState() => _TimeGridState();
+  ConsumerState<TimeGrid> createState() => _TimeGridState();
 }
 
-class _TimeGridState extends State<TimeGrid> {
+class _TimeGridState extends ConsumerState<TimeGrid> {
   late final ScrollController _controller;
   late final DateTime? _now;
   late final double? _nowTop;
@@ -82,7 +84,12 @@ class _TimeGridState extends State<TimeGrid> {
                           child: Padding(
                             padding: const EdgeInsets.only(right: 8, top: 2),
                             child: Text(
-                              '${hour.toString().padLeft(2, '0')}:00',
+                              formatHourLabel(
+                                hour,
+                                use24Hour: ref
+                                    .watch(currentSettingsProvider)
+                                    .use24HourFormat,
+                              ),
                               style: Theme.of(context).textTheme.labelSmall
                                   ?.copyWith(
                                     color: colorScheme.onSurfaceVariant,

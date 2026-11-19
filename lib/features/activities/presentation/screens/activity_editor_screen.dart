@@ -7,7 +7,9 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/theme/activity_colors.dart';
 import '../../../../core/responsive/constrained_content.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/date_format.dart';
 import '../../../backlog/providers/tasks_providers.dart';
+import '../../../settings/providers/settings_providers.dart';
 import '../../domain/activity.dart';
 import '../../domain/recurrence_end.dart';
 import '../../domain/recurrence_rule.dart';
@@ -260,11 +262,24 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
     TimeOfDay initial,
     ValueChanged<TimeOfDay> onPicked,
   ) async {
-    final picked = await showTimePicker(context: context, initialTime: initial);
+    final use24Hour = ref.read(currentSettingsProvider).use24HourFormat;
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: use24Hour),
+        child: child!,
+      ),
+    );
     if (picked != null) {
       onPicked(picked);
     }
   }
+
+  String _fmtTod(TimeOfDay t) => formatTimeOfDay(
+    t,
+    use24Hour: ref.watch(currentSettingsProvider).use24HourFormat,
+  );
 
   int _todToMinutes(TimeOfDay t) => t.hour * 60 + t.minute;
 
@@ -641,7 +656,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
                         child: ListTile(
                           contentPadding: EdgeInsets.zero,
                           title: const Text('Inicio'),
-                          subtitle: Text(_singleStart.format(context)),
+                          subtitle: Text(_fmtTod(_singleStart)),
                           onTap: () => _pickTime(
                             _singleStart,
                             (t) => setState(() => _singleStart = t),
@@ -652,7 +667,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
                         child: ListTile(
                           contentPadding: EdgeInsets.zero,
                           title: const Text('Fin'),
-                          subtitle: Text(_singleEnd.format(context)),
+                          subtitle: Text(_fmtTod(_singleEnd)),
                           onTap: () => _pickTime(
                             _singleEnd,
                             (t) => setState(() => _singleEnd = t),
@@ -668,7 +683,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
                         child: ListTile(
                           contentPadding: EdgeInsets.zero,
                           title: const Text('Inicio'),
-                          subtitle: Text(_recStart.format(context)),
+                          subtitle: Text(_fmtTod(_recStart)),
                           onTap: () => _pickTime(
                             _recStart,
                             (t) => setState(() => _recStart = t),
@@ -679,7 +694,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
                         child: ListTile(
                           contentPadding: EdgeInsets.zero,
                           title: const Text('Fin'),
-                          subtitle: Text(_recEnd.format(context)),
+                          subtitle: Text(_fmtTod(_recEnd)),
                           onTap: () => _pickTime(
                             _recEnd,
                             (t) => setState(() => _recEnd = t),

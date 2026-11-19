@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../settings/domain/app_settings.dart';
+import '../../settings/providers/settings_providers.dart';
 import '../domain/activity.dart';
 import '../domain/occurrence.dart';
 import '../domain/recurrence_engine.dart';
@@ -36,15 +38,13 @@ final weekOccurrencesProvider = Provider.family<List<Occurrence>, DateTime>((
   date,
 ) {
   final normalized = DateTime(date.year, date.month, date.day);
-  final weekday = normalized.weekday;
-  final monday = DateTime(
-    normalized.year,
-    normalized.month,
-    normalized.day - (weekday - 1),
+  final weekStart = startOfWeek(
+    normalized,
+    ref.watch(currentSettingsProvider).weekStart,
   );
-  final sunday = DateTime(monday.year, monday.month, monday.day + 6);
+  final weekEnd = DateTime(weekStart.year, weekStart.month, weekStart.day + 6);
   final asyncActivities = ref.watch(activitiesStreamProvider);
   final activities = asyncActivities.asData?.value;
   if (activities == null) return const [];
-  return expandAll(activities, monday, sunday);
+  return expandAll(activities, weekStart, weekEnd);
 });

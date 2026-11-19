@@ -7,6 +7,7 @@ import '../../../../core/responsive/constrained_content.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/date_format.dart';
+import '../../../../shared/widgets/settings_action.dart';
 import '../../../activities/domain/occurrence.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
 import '../../providers/calendar_state.dart';
@@ -73,6 +74,7 @@ class CalendarScreen extends ConsumerWidget {
             tooltip: 'Siguiente',
             onPressed: navigateNext,
           ),
+          const SettingsAction(),
         ],
       ),
       body: Column(

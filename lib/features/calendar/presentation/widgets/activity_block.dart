@@ -8,6 +8,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../activities/domain/occurrence.dart';
 import '../../../../core/utils/date_format.dart';
 import '../../../backlog/providers/tasks_providers.dart';
+import '../../../settings/providers/settings_providers.dart';
 
 class ActivityBlock extends ConsumerWidget {
   const ActivityBlock({
@@ -112,7 +113,13 @@ class ActivityBlock extends ConsumerWidget {
                   ],
                 ),
                 Text(
-                  formatHourRange(occurrence.start, occurrence.end),
+                  formatHourRange(
+                    occurrence.start,
+                    occurrence.end,
+                    use24Hour: ref
+                        .watch(currentSettingsProvider)
+                        .use24HourFormat,
+                  ),
                   style: ts.labelSmall?.copyWith(
                     color: fg.withValues(alpha: 0.85),
                   ),

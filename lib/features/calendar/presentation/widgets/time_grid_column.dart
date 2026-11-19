@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/activity_colors.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -7,10 +8,11 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/date_format.dart';
 import '../../../activities/domain/occurrence.dart';
 import '../../../activities/domain/overlap_layout.dart';
+import '../../../settings/providers/settings_providers.dart';
 import '../../domain/drag_time.dart';
 import 'activity_block.dart';
 
-class TimeGridColumn extends StatefulWidget {
+class TimeGridColumn extends ConsumerStatefulWidget {
   const TimeGridColumn({
     super.key,
     required this.date,
@@ -37,7 +39,7 @@ class TimeGridColumn extends StatefulWidget {
   static const double minBlockHeightForHandles = 44;
 
   @override
-  State<TimeGridColumn> createState() => _TimeGridColumnState();
+  ConsumerState<TimeGridColumn> createState() => _TimeGridColumnState();
 }
 
 class _CreateDrag {
@@ -61,7 +63,7 @@ class _ResizeDrag {
   int currentMinutes;
 }
 
-class _TimeGridColumnState extends State<TimeGridColumn> {
+class _TimeGridColumnState extends ConsumerState<TimeGridColumn> {
   final GlobalKey _contentKey = GlobalKey();
   double? _nowTop;
   _CreateDrag? _createDrag;
@@ -330,7 +332,11 @@ class _TimeGridColumnState extends State<TimeGridColumn> {
       endMinutes ~/ 60,
       endMinutes % 60,
     );
-    final label = formatHourRange(start, end);
+    final label = formatHourRange(
+      start,
+      end,
+      use24Hour: ref.watch(currentSettingsProvider).use24HourFormat,
+    );
     return Positioned(
       top: top + 1,
       left: 4,

@@ -231,11 +231,30 @@ Notas de implementación:
 
 ## Hito 20 — Pantalla de ajustes
 
-- [ ] Preferencias persistentes (inicio de semana, modo de tema, formato
+- [x] Preferencias persistentes (inicio de semana, modo de tema, formato
       12/24h)
-- [ ] Decidir almacenamiento: `shared_preferences` vs tabla Drift
-- [ ] Ruta `/settings` + entrada desde el shell
-- [ ] Widget tests
+- [x] Decidir almacenamiento: `shared_preferences` vs tabla Drift
+- [x] Ruta `/settings` + entrada desde el shell
+- [x] Widget tests
+
+Notas de implementación:
+- Almacenamiento: **`shared_preferences`** (claves `settings.*`), detrás de la
+  interfaz `SettingsStore` (`SharedPrefsSettingsStore` + `InMemorySettingsStore`
+  para tests). Sin migración de schema.
+- Dominio puro en `lib/features/settings/domain/app_settings.dart`
+  (`AppSettings`, `ThemePreference`, `WeekStart`, `startOfWeek()`).
+- `settingsProvider` (`AsyncNotifier`) + `currentSettingsProvider` (defaults si
+  falla la carga). `BlockdayApp` aplica `themeMode` y un override de
+  `MediaQuery.alwaysUse24HourFormat` (así el `showTimePicker` respeta el
+  formato 12/24h — lo decide solo esa MediaQuery).
+- Formato de hora en display: `formatHour/formatHourRange/formatTimeOfDay/
+  formatHourLabel` con `use24Hour` (gutters, bloques, preview, home y horas del
+  editor de actividad).
+- Inicio de semana: `startOfWeek()` en `weekOccurrencesProvider`, `WeekView`
+  (días de la semana), `MonthView` (celdas iniciales + rótulos) y
+  `weeklyProgressProvider` del Inicio.
+- UI: `SettingsScreen` (segmentados Tema / Inicio de semana / Reloj) + acción
+  `SettingsAction` en las AppBars de Inicio, Calendario y Backlog.
 
 ## Hito 21 — Búsqueda global
 

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/date_format.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
+import '../../../settings/providers/settings_providers.dart';
 import 'days_header.dart';
 import 'time_grid_column.dart';
 
@@ -80,7 +81,12 @@ class _ThreeDayViewState extends ConsumerState<ThreeDayView> {
                             child: Padding(
                               padding: const EdgeInsets.only(right: 6, top: 2),
                               child: Text(
-                                '${h.toString().padLeft(2, '0')}:00',
+                                formatHourLabel(
+                                  h,
+                                  use24Hour: ref
+                                      .watch(currentSettingsProvider)
+                                      .use24HourFormat,
+                                ),
                                 style: Theme.of(context).textTheme.labelSmall
                                     ?.copyWith(
                                       color: colorScheme.onSurfaceVariant,

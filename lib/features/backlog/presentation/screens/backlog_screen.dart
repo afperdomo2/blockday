@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/responsive/constrained_content.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/section_header.dart';
+import '../../../../shared/widgets/settings_action.dart';
 import '../../domain/task.dart';
 import '../../providers/tasks_providers.dart';
 import '../widgets/task_tile.dart';
@@ -77,6 +78,7 @@ class _BacklogScreenState extends ConsumerState<BacklogScreen> {
               tooltip: 'Buscar',
               onPressed: _startSearch,
             ),
+          const SettingsAction(),
         ],
       ),
       body: ConstrainedContent(

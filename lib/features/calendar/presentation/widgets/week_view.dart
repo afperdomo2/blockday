@@ -11,6 +11,8 @@ import '../../../../core/utils/date_format.dart';
 import '../../../activities/domain/occurrence.dart';
 import '../../../activities/domain/overlap_layout.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
+import '../../../settings/domain/app_settings.dart';
+import '../../../settings/providers/settings_providers.dart';
 import 'days_header.dart';
 
 class WeekView extends ConsumerStatefulWidget {
@@ -32,20 +34,16 @@ class _WeekViewState extends ConsumerState<WeekView> {
   late final double? _nowTop;
   late final int? _todayIndex;
 
-  DateTime get monday {
-    final d = DateTime(
-      widget.selectedDate.year,
-      widget.selectedDate.month,
-      widget.selectedDate.day,
-    );
-    return DateTime(d.year, d.month, d.day - (d.weekday - 1));
-  }
+  DateTime get _weekStart => startOfWeek(
+    widget.selectedDate,
+    ref.read(currentSettingsProvider).weekStart,
+  );
 
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
-    final m = monday;
+    final m = _weekStart;
     final sunday = DateTime(m.year, m.month, m.day + 6);
     final normalizedNow = DateTime(now.year, now.month, now.day);
     if (!normalizedNow.isBefore(m) && !normalizedNow.isAfter(sunday)) {
@@ -70,10 +68,12 @@ class _WeekViewState extends ConsumerState<WeekView> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(currentSettingsProvider);
     final occurrences = ref.watch(weekOccurrencesProvider(widget.selectedDate));
+    final weekStart = _weekStart;
     final weekDays = List.generate(
       7,
-      (i) => DateTime(monday.year, monday.month, monday.day + i),
+      (i) => DateTime(weekStart.year, weekStart.month, weekStart.day + i),
     );
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -109,7 +109,12 @@ class _WeekViewState extends ConsumerState<WeekView> {
                                         top: 2,
                                       ),
                                       child: Text(
-                                        '${h.toString().padLeft(2, '0')}:00',
+                                        formatHourLabel(
+                                          h,
+                                          use24Hour: ref
+                                              .watch(currentSettingsProvider)
+                                              .use24HourFormat,
+                                        ),
                                         style: Theme.of(context)
                                             .textTheme
                                             .labelSmall

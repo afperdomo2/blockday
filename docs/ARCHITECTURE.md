@@ -8,6 +8,7 @@
 | Layout | Adaptativo por *window size class* | Mobile-first, con rail y ancho acotado en tablet/escritorio |
 | Estado | `flutter_riverpod` | Testeable, sin `setState` global |
 | Persistencia | `drift` (SQLite) | SQL real, queries por rango de fechas, DB en memoria para tests |
+| Preferencias | `shared_preferences` | Prefs ligeras (tema, inicio de semana, 12/24h), sin migración |
 | Navegación | `go_router` | Rutas declarativas, deep-linking futuro |
 | Fechas | `intl` (locale `es`) | Formato en español |
 | Modelos | Dart inmutables a mano | Sin freezed/json_serializable (menos codegen) |
@@ -37,6 +38,14 @@ lib/
 │   │   ├── data/       # mappers, TasksRepository, SessionsRepository
 │   │   ├── presentation/  # BacklogScreen, TaskEditor, TaskTile
 │   │   └── providers/  # tasks/sessions/progress providers
+│   ├── home/
+│   │   ├── presentation/  # dashboard Inicio
+│   │   └── providers/     # resumen semanal
+│   ├── settings/
+│   │   ├── domain/     # AppSettings, ThemePreference, WeekStart (puro)
+│   │   ├── data/       # SettingsStore (shared_preferences + in-memory)
+│   │   ├── presentation/  # SettingsScreen
+│   │   └── providers/  # settingsProvider, currentSettingsProvider
 │   └── calendar/
 │       ├── presentation/  # shell, vista día/semana/mes, time-grid
 │       └── providers/     # fecha seleccionada, vista actual, ocurrencias por rango
@@ -170,16 +179,21 @@ Tests con `NativeDatabase.memory()` / executor en memoria.
 - `calendarStateProvider` → `CalendarState{ selectedDate, view (día/semana/mes) }`.
 - `occurrencesProvider(rangeStart, rangeEnd)` → ocurrencias expandidas para el
   rango visible (family provider).
+- `settingsStoreProvider` / `settingsProvider` (AsyncNotifier) /
+  `currentSettingsProvider` → preferencias (tema, inicio de semana, 12/24h).
 
 ## Navegación
 
-- Shell `StatefulShellRoute.indexedStack` con `MainShell` (NavigationBar: Calendario / Backlog)
-  - `/` → calendario (vistas día/semana/mes)
+- Shell `StatefulShellRoute.indexedStack` con `MainShell`
+  (NavigationBar/rail: Inicio / Calendario / Backlog)
+  - `/` → Inicio (dashboard)
+  - `/calendar` → calendario (vistas día/3 días/semana/mes)
   - `/backlog` → BacklogScreen (captura rápida + filtros + secciones)
   - `/backlog/task/new` → nueva tarea
   - `/backlog/task/:id` → editar tarea
 - `/activity/new?date=...&hour=...&taskId=...` → editor de actividad (prefill + vínculo)
 - `/activity/:id` → editar actividad existente (con selector de tarea vinculada)
+- `/settings` → ajustes (preferencias)
 
 ## Estrategia de tests
 
