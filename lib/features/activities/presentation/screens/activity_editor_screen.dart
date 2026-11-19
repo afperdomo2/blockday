@@ -8,6 +8,7 @@ import '../../../../core/theme/activity_colors.dart';
 import '../../../../core/responsive/constrained_content.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/date_format.dart';
+import '../../../../shared/widgets/notes_field.dart';
 import '../../../backlog/providers/tasks_providers.dart';
 import '../../../notifications/providers/notifications_providers.dart';
 import '../../../settings/providers/settings_providers.dart';
@@ -575,14 +576,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
                       : null,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                TextFormField(
-                  controller: _notesCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Notas',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                ),
+                NotesField(controller: _notesCtrl, maxLines: 3),
                 const SizedBox(height: AppSpacing.lg),
                 Text('Color', style: Theme.of(context).textTheme.titleSmall),
                 const SizedBox(height: AppSpacing.sm),

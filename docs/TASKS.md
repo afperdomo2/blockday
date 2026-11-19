@@ -105,7 +105,7 @@ en verde (ver AGENTS.md).
 - [x] Empty states y filtros en Backlog
 - [x] Corrección de `time_grid_test.dart` para `ProviderScope` + `sessionsStreamProvider`
 - [x] Tags de tareas
-- [ ] Markdown en notas (campo `notes` ya preparado, render deferido)
+- [x] Markdown en notas
 - [ ] Animaciones avanzadas según `apple-design` para Backlog (staggered list)
 
 Notas de implementación (tags):
@@ -115,6 +115,13 @@ Notas de implementación (tags):
 - UI: chips `InputChip` en `TaskEditorScreen` (añadir con Enter o botón +),
   chips `#tag` en `TaskTile`, fila de filtros por etiqueta en `BacklogScreen`
   (selección única, toggle) y la búsqueda del backlog también matchea tags.
+
+Notas de implementación (markdown en notas):
+- Dependencia `flutter_markdown_plus` (continuación mantenida de
+  `flutter_markdown`, mismo API: `MarkdownBody` + `MarkdownStyleSheet`).
+- Widgets compartidos: `MarkdownNote` (render) y `NotesField` (campo de notas
+  con toggle «Vista previa»/«Editar», contenedor con borde y estado vacío).
+  Se usan en el editor de tarea y el de actividad.
 
 ## Hito 15 — Fix de navegación post-editor
 

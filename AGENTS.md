@@ -26,6 +26,8 @@ Roadmap de trabajo: `docs/TASKS.md`
   (recordatorios; interfaz `NotificationService` con fake para tests).
 - Backup: **file_picker** (export/import JSON de todas las tablas; codec puro
   en `features/backup/domain/`, repositorio con reemplazo total).
+- Markdown en notas: **flutter_markdown_plus** (`MarkdownNote` + `NotesField`
+  compartidos en `lib/shared/widgets/`).
 - Navegación: **go_router**.
 - Fechas/formato: **intl** (locale `es`).
 - UI en **español** (strings hardcodeados, sin i18n por ahora).

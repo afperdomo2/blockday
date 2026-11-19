@@ -7,6 +7,7 @@ import '../../../../core/responsive/constrained_content.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/widgets/notes_field.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
 import '../../domain/task.dart';
 import '../../providers/tasks_providers.dart';
@@ -270,14 +271,9 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                     : null,
               ),
               const SizedBox(height: 12),
-              TextFormField(
+              NotesField(
                 controller: _notesCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Notas',
-                  border: OutlineInputBorder(),
-                  hintText: 'Descripción, links, markdown futuro...',
-                ),
-                maxLines: 4,
+                hintText: 'Descripción, links, markdown...',
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<TaskKind>(
