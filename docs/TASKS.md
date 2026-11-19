@@ -106,7 +106,7 @@ en verde (ver AGENTS.md).
 - [x] Corrección de `time_grid_test.dart` para `ProviderScope` + `sessionsStreamProvider`
 - [x] Tags de tareas
 - [x] Markdown en notas
-- [ ] Animaciones avanzadas según `apple-design` para Backlog (staggered list)
+- [x] Animaciones avanzadas para Backlog (staggered list)
 
 Notas de implementación (tags):
 - Schema 3→4: columna `tasks.tags` (lista JSON serializada, nullable).
@@ -122,6 +122,17 @@ Notas de implementación (markdown en notas):
 - Widgets compartidos: `MarkdownNote` (render) y `NotesField` (campo de notas
   con toggle «Vista previa»/«Editar», contenedor con borde y estado vacío).
   Se usan en el editor de tarea y el de actividad.
+
+Notas de implementación (animaciones staggered del Backlog):
+- Widgets compartidos `StaggeredEntrance` + `StaggeredItem`
+  (`lib/shared/widgets/staggered_entrance.dart`): un único
+  `AnimationController` con `Interval` por índice (fade + slide sutil,
+  `AppMotion.enter`, timeline de 900 ms, paso 4.5 % por item).
+- Respeta `MediaQuery.disableAnimations` (reduced motion → render directo) y
+  un `StaggeredItem` sin scope renderiza el hijo sin animar.
+- Backlog: cabeceras de sección y tiles se reparten índices globales
+  (`staggerBase` acumulado entre secciones); solo anima al montar, no en cada
+  filtro (el controller queda en `completed`).
 
 ## Hito 15 — Fix de navegación post-editor
 

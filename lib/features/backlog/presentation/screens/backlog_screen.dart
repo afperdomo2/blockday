@@ -6,6 +6,7 @@ import '../../../../core/responsive/constrained_content.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/section_header.dart';
 import '../../../../shared/widgets/settings_action.dart';
+import '../../../../shared/widgets/staggered_entrance.dart';
 import '../../../search/domain/search_filter.dart';
 import '../../domain/task.dart';
 import '../../providers/tasks_providers.dart';
@@ -136,15 +137,22 @@ class _BacklogScreenState extends ConsumerState<BacklogScreen> {
                       : ListView(
                           padding: const EdgeInsets.only(bottom: 80),
                           children: [
-                            if (_statusFilter == 'all' && _searchQuery.isEmpty)
-                              ..._buildAllSections(filtered)
-                            else
-                              _Section(
-                                title: _sectionTitleForFilter(),
-                                count: filtered.length,
-                                tasks: filtered,
-                                emptyText: 'Sin tareas',
+                            StaggeredEntrance(
+                              child: Column(
+                                children: [
+                                  if (_statusFilter == 'all' &&
+                                      _searchQuery.isEmpty)
+                                    ..._buildAllSections(filtered)
+                                  else
+                                    _Section(
+                                      title: _sectionTitleForFilter(),
+                                      count: filtered.length,
+                                      tasks: filtered,
+                                      emptyText: 'Sin tareas',
+                                    ),
+                                ],
                               ),
+                            ),
                           ],
                         ),
                 ),
@@ -173,31 +181,37 @@ class _BacklogScreenState extends ConsumerState<BacklogScreen> {
       final s = ref.read(taskStatusProvider(t.id));
       byStatus[s]!.add(t);
     }
+
+    var base = 0;
+    Widget section(String title, List<Task> tasks, String emptyText) {
+      final widget = _Section(
+        title: title,
+        count: tasks.length,
+        tasks: tasks,
+        emptyText: emptyText,
+        staggerBase: base,
+      );
+      base += tasks.isEmpty ? 2 : tasks.length + 1;
+      return widget;
+    }
+
     return [
-      _Section(
-        title: 'Sin programar',
-        count: byStatus[TaskStatus.pending]!.length,
-        tasks: byStatus[TaskStatus.pending]!,
-        emptyText: 'Nada sin programar',
+      section(
+        'Sin programar',
+        byStatus[TaskStatus.pending]!,
+        'Nada sin programar',
       ),
-      _Section(
-        title: 'Programadas',
-        count: byStatus[TaskStatus.scheduled]!.length,
-        tasks: byStatus[TaskStatus.scheduled]!,
-        emptyText: 'Nada programado',
+      section(
+        'Programadas',
+        byStatus[TaskStatus.scheduled]!,
+        'Nada programado',
       ),
-      _Section(
-        title: 'En progreso',
-        count: byStatus[TaskStatus.inProgress]!.length,
-        tasks: byStatus[TaskStatus.inProgress]!,
-        emptyText: 'Nada en progreso',
+      section(
+        'En progreso',
+        byStatus[TaskStatus.inProgress]!,
+        'Nada en progreso',
       ),
-      _Section(
-        title: 'Hechas',
-        count: byStatus[TaskStatus.completed]!.length,
-        tasks: byStatus[TaskStatus.completed]!,
-        emptyText: 'Nada hecho aún',
-      ),
+      section('Hechas', byStatus[TaskStatus.completed]!, 'Nada hecho aún'),
     ];
   }
 
@@ -329,45 +343,57 @@ class _Section extends StatelessWidget {
     required this.count,
     required this.tasks,
     required this.emptyText,
+    this.staggerBase = 0,
   });
 
   final String title;
   final int count;
   final List<Task> tasks;
   final String emptyText;
+  final int staggerBase;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            AppSpacing.md,
-            AppSpacing.lg,
-            AppSpacing.xs,
+        StaggeredItem(
+          index: staggerBase,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.lg,
+              AppSpacing.xs,
+            ),
+            child: SectionHeader(title: title, count: count),
           ),
-          child: SectionHeader(title: title, count: count),
         ),
         if (tasks.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.sm,
-            ),
-            child: Text(
-              emptyText,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+          StaggeredItem(
+            index: staggerBase + 1,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.sm,
+              ),
+              child: Text(
+                emptyText,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           )
         else
-          ...tasks.map(
-            (t) => TaskTile(
-              task: t,
-              onTap: () => GoRouter.of(context).go('/backlog/task/${t.id}'),
+          ...tasks.asMap().entries.map(
+            (entry) => StaggeredItem(
+              index: staggerBase + 1 + entry.key,
+              child: TaskTile(
+                task: entry.value,
+                onTap: () =>
+                    GoRouter.of(context).go('/backlog/task/${entry.value.id}'),
+              ),
             ),
           ),
       ],
