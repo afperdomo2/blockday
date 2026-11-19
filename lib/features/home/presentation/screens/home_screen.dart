@@ -9,6 +9,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/date_format.dart';
 import '../../../../shared/widgets/about_dialog.dart';
 import '../../../../shared/widgets/app_progress_bar.dart';
+import '../../../../shared/widgets/search_action.dart';
 import '../../../../shared/widgets/section_header.dart';
 import '../../../../shared/widgets/settings_action.dart';
 import '../../../activities/domain/occurrence.dart';
@@ -47,6 +48,7 @@ class HomeScreen extends ConsumerWidget {
         title: const Text('Inicio'),
         centerTitle: false,
         actions: [
+          const SearchAction(),
           const SettingsAction(),
           IconButton(
             tooltip: 'Acerca de',

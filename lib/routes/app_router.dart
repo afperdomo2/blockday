@@ -5,6 +5,7 @@ import '../features/backlog/presentation/screens/backlog_screen.dart';
 import '../features/backlog/presentation/screens/task_editor_screen.dart';
 import '../features/calendar/presentation/screens/calendar_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
+import '../features/search/presentation/screens/search_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import 'main_shell.dart';
 
@@ -60,5 +61,6 @@ final GoRouter appRouter = GoRouter(
       path: '/settings',
       builder: (context, state) => const SettingsScreen(),
     ),
+    GoRoute(path: '/search', builder: (context, state) => const SearchScreen()),
   ],
 );

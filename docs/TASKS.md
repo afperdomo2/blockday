@@ -266,9 +266,21 @@ Notas de implementación:
 
 ## Hito 21 — Búsqueda global
 
-- [ ] Buscar actividades + tareas en una vista de resultados
-- [ ] Centralizar/reutilizar el buscador del backlog
-- [ ] Tests de filtrado
+- [x] Buscar actividades + tareas en una vista de resultados
+- [x] Centralizar/reutilizar el buscador del backlog
+- [x] Tests de filtrado
+
+Notas de implementación:
+- Matcher compartido y puro en `lib/features/search/domain/search_filter.dart`
+  (`textMatches`, `taskMatchesQuery` — título/notas/tags —,
+  `activityMatchesQuery`, `filterTasks`, `filterActivities`). El backlog y la
+  búsqueda global lo usan los dos.
+- `SearchScreen` en `/search` con secciones «Actividades» y «Tareas», estados
+  vacíos, subtítulo con fecha/hora (próxima ocurrencia en recurrentes) y
+  navegación al editor correspondiente (el `from=/search` se añadió a la
+  whitelist de retorno del editor de actividad).
+- Entradas: acción `SearchAction` en las AppBars de Inicio y Calendario (el
+  Backlog conserva su búsqueda inline con el matcher compartido).
 
 ## Hito 22 — Backup export/import JSON
 

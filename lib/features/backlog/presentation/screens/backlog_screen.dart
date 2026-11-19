@@ -6,6 +6,7 @@ import '../../../../core/responsive/constrained_content.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/section_header.dart';
 import '../../../../shared/widgets/settings_action.dart';
+import '../../../search/domain/search_filter.dart';
 import '../../domain/task.dart';
 import '../../providers/tasks_providers.dart';
 import '../widgets/task_tile.dart';
@@ -277,15 +278,7 @@ class _BacklogScreenState extends ConsumerState<BacklogScreen> {
     var result = tasks;
 
     if (_searchQuery.isNotEmpty) {
-      final q = _searchQuery.toLowerCase();
-      result = result
-          .where(
-            (t) =>
-                t.title.toLowerCase().contains(q) ||
-                (t.notes?.toLowerCase().contains(q) ?? false) ||
-                t.tags.any((tag) => tag.toLowerCase().contains(q)),
-          )
-          .toList();
+      result = result.where((t) => taskMatchesQuery(t, _searchQuery)).toList();
     }
 
     if (_tagFilter != null) {

@@ -140,7 +140,8 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
     if (from == '/' ||
         from == '/calendar' ||
         from == '/backlog' ||
-        from.startsWith('/backlog/')) {
+        from.startsWith('/backlog/') ||
+        from == '/search') {
       return from;
     }
     return '/calendar';

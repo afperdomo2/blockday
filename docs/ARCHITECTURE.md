@@ -52,6 +52,9 @@ lib/
 │   │   ├── domain/     # reminder_schedule (cálculo de disparos, puro)
 │   │   ├── data/       # NotificationService (plugin + fake)
 │   │   └── providers/  # remindersController, bootstrap
+│   ├── search/
+│   │   ├── domain/     # search_filter (matcher compartido, puro)
+│   │   └── presentation/  # SearchScreen (búsqueda global)
 │   ├── settings/
 │   │   ├── domain/     # AppSettings, ThemePreference, WeekStart (puro)
 │   │   ├── data/       # SettingsStore (shared_preferences + in-memory)
@@ -207,7 +210,8 @@ Tests con `NativeDatabase.memory()` / executor en memoria.
   - `/backlog/task/:id` → editar tarea
 - `/activity/new?date=...&hour=...&taskId=...` → editor de actividad (prefill + vínculo)
 - `/activity/:id` → editar actividad existente (con selector de tarea vinculada)
-- `/settings` → ajustes (preferencias)
+- `/settings` → ajustes (preferencias + backup)
+- `/search` → búsqueda global de actividades y tareas
 
 ## Estrategia de tests
 
