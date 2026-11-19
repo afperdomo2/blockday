@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Blockday
+GenericName=Calendario de bloques
+Comment=Planifica bloques de tiempo, eventos y tareas
+# install-linux.sh y build-deb.sh reemplazan el marcador de Exec por la ruta
+# absoluta del binario instalado.
+Exec=@EXEC@
+TryExec=@EXEC@
+Icon=blockday
+Terminal=false
+Categories=Office;Calendar;
+Keywords=calendario;agenda;bloques;tareas;blockday;
+StartupNotify=true
+StartupWMClass=com.example.blockday

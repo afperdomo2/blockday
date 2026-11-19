@@ -1,13 +1,15 @@
-# Design System Master File
+# Blockday — Sistema de diseño
 
-> **LOGIC:** When building a specific page, first check `design-system/pages/[page-name].md`.
-> If that file exists, its rules **override** this Master file.
-> If not, strictly follow the rules below.
+> Fuente de verdad de la UI. Vive en `docs/` junto al resto de la documentación
+> (antes estaba en `design-system/blockday/MASTER.md`).
+> Si alguna pantalla necesita reglas propias, van en `docs/pages/<pantalla>.md`
+> y **sobrescriben** este archivo.
 
 ---
 
 **Project:** Blockday
 **Generated:** 2026-10-05 16:37:01
+**Moved to docs/:** 2026-11-18
 **Category:** Calendar & Scheduling App
 **Design Dials:** Variance 4/10 (Balanced / Modern) | Density 7/10 (Standard)
 

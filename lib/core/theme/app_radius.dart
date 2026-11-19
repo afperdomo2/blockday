@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Corner radius tokens.
 ///
-/// Source of truth: `design-system/blockday/MASTER.md`.
+/// Source of truth: `docs/DESIGN_SYSTEM.md`.
 abstract final class AppRadius {
   AppRadius._();
 

@@ -10,7 +10,7 @@ en verde (ver AGENTS.md).
 - [x] `docs/PRODUCT.md` (alcance, historias, no-alcance)
 - [x] `docs/ARCHITECTURE.md` (stack, modelo, motor de recurrencia, Drift)
 - [x] `docs/TASKS.md` (este archivo)
-- [x] Commitear `opencode.json`, `skills-lock.json`, fix `.gitignore`
+- [x] Commitear `skills-lock.json`, fix `.gitignore` (`opencode.json` local)
 
 ## Hito 2 — Foundation
 
@@ -257,6 +257,17 @@ Notas de implementación:
 - [ ] Programar/cancelar notificaciones al guardar/eliminar
 - [ ] Permisos Android + canal de notificaciones Windows
 - [ ] Tests de la lógica de programación (tiempo de disparo)
+
+## Hito 24 — Linux, versionado y distribución
+
+- [x] Plataforma Linux (`linux/`), título de ventana, icono y `.desktop`
+- [x] `scripts/bump-build.sh` (versión única en `pubspec.yaml`)
+- [x] `scripts/build.sh` (release con commit/fecha inyectados)
+- [x] `scripts/build-deb.sh` (`.deb` en `dist/` con dependencias calculadas)
+- [x] `scripts/install-linux.sh` (instalación local sin `sudo`, para pruebas)
+- [x] `scripts/build-apk.sh` (APK de Android en `dist/`)
+- [x] Diálogo «Acerca de» con versión, build, commit, fecha y plataforma
+- [x] Documentación: README (desarrollo/distribución) y AGENTS.md
 
 ## Fase 3 (futuro, no programado)
 

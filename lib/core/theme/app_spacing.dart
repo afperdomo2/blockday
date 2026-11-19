@@ -1,6 +1,6 @@
 /// Spacing scale (4/8dp rhythm).
 ///
-/// Source of truth: `design-system/blockday/MASTER.md`.
+/// Source of truth: `docs/DESIGN_SYSTEM.md`.
 /// Prefer these tokens over ad-hoc `SizedBox`/`EdgeInsets` values.
 abstract final class AppSpacing {
   AppSpacing._();

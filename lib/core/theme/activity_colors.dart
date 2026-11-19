@@ -12,7 +12,7 @@ class ActivityColor {
 ///
 /// Foregrounds are contrast-checked against their background (>= 4.5:1 for
 /// normal text). Dark mode uses desaturated/lighter tonal variants.
-/// Source of truth: `design-system/blockday/MASTER.md`.
+/// Source of truth: `docs/DESIGN_SYSTEM.md`.
 abstract final class ActivityColors {
   ActivityColors._();
 

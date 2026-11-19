@@ -4,7 +4,7 @@
 
 Una app de calendario personal, simple y rápida, para planificar el día en
 bloques de tiempo: qué hago, cuándo y con qué frecuencia. Funciona 100%
-offline en Windows y Android. Inspirada en la experiencia de Google Calendar
+offline en Windows, Android y Linux. Inspirada en la experiencia de Google Calendar
 pero centrada en bloques de actividades personales (estudio, trabajo,
 hábitos).
 
@@ -51,7 +51,7 @@ bloques recurrentes (rutinas) + eventos puntuales (citas, cursos).
 - Crear actividad en ≤ 3 toques/clics: título, hora, días de repetición.
 - Navegación por gestos (swipe entre días/semanas) y botones de navegación.
 - UI fluida: springs, feedback inmediato y tokens de diseño definidos en
-  `design-system/blockday/MASTER.md` (ver skill `ui-ux-pro-max`).
+  `docs/DESIGN_SYSTEM.md` (ver skill `ui-ux-pro-max`).
 
 ## Métricas de éxito (v1)
 

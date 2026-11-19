@@ -6,6 +6,7 @@ import '../../../../core/theme/activity_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/date_format.dart';
+import '../../../../shared/widgets/about_dialog.dart';
 import '../../../../shared/widgets/app_progress_bar.dart';
 import '../../../../shared/widgets/section_header.dart';
 import '../../../activities/domain/occurrence.dart';
@@ -39,7 +40,17 @@ class HomeScreen extends ConsumerWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Inicio'), centerTitle: false),
+      appBar: AppBar(
+        title: const Text('Inicio'),
+        centerTitle: false,
+        actions: [
+          IconButton(
+            tooltip: 'Acerca de',
+            icon: const Icon(Icons.info_outline),
+            onPressed: () => showBlockdayAboutDialog(context),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg,

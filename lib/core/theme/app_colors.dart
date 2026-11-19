@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Semantic color tokens.
 ///
-/// Source of truth: `design-system/blockday/MASTER.md`.
+/// Source of truth: `docs/DESIGN_SYSTEM.md`.
 /// Use these instead of raw hex values in widgets.
 abstract final class AppColors {
   AppColors._();

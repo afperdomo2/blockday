@@ -4,7 +4,7 @@
 
 | Área | Decisión | Motivo |
 |---|---|---|
-| UI | Flutter (Windows + Android) | Un solo código para ambos targets |
+| UI | Flutter (Windows, Android y Linux) | Un solo código para los tres targets |
 | Estado | `flutter_riverpod` | Testeable, sin `setState` global |
 | Persistencia | `drift` (SQLite) | SQL real, queries por rango de fechas, DB en memoria para tests |
 | Navegación | `go_router` | Rutas declarativas, deep-linking futuro |

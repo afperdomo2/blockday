@@ -2199,14 +2199,19 @@ class $$TasksTableTableManager
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (activitiesRefs)
-                    await $_getPrefetchedData<Task, $TasksTable, Activity>(
+                    await $_getPrefetchedDataByColumns<
+                      Task,
+                      $TasksTable,
+                      Activity,
+                      $ActivitiesTable
+                    >(
                       currentTable: table,
                       referencedTable: $$TasksTableReferences
                           ._activitiesRefsTable(db),
                       managerFromTypedResult: (p0) =>
                           $$TasksTableReferences(db, table, p0).activitiesRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.taskId == item.id),
+                      currentColumn: 'id',
+                      referencedColumn: 'task_id',
                       typedResults: items,
                     ),
                 ];
@@ -2855,10 +2860,11 @@ class $$ActivitiesTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (activityExclusionsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           Activity,
                           $ActivitiesTable,
-                          ActivityExclusion
+                          ActivityExclusion,
+                          $ActivityExclusionsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ActivitiesTableReferences
@@ -2869,17 +2875,16 @@ class $$ActivitiesTableTableManager
                                 table,
                                 p0,
                               ).activityExclusionsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.activityId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'activity_id',
                           typedResults: items,
                         ),
                       if (activitySessionsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           Activity,
                           $ActivitiesTable,
-                          ActivitySession
+                          ActivitySession,
+                          $ActivitySessionsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ActivitiesTableReferences
@@ -2890,10 +2895,8 @@ class $$ActivitiesTableTableManager
                                 table,
                                 p0,
                               ).activitySessionsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.activityId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'activity_id',
                           typedResults: items,
                         ),
                     ];

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// Shared motion tokens.
 ///
 /// Enter decelerates, exit accelerates (exit ~60-70% of enter duration).
-/// Source of truth: `design-system/blockday/MASTER.md` + `ui-ux-pro-max` §7.
+/// Source of truth: `docs/DESIGN_SYSTEM.md` + `ui-ux-pro-max` §7.
 abstract final class AppMotion {
   AppMotion._();
 

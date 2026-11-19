@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Typography tokens.
 ///
-/// Source of truth: `design-system/blockday/MASTER.md`.
+/// Source of truth: `docs/DESIGN_SYSTEM.md`.
 /// Font: Plus Jakarta Sans (bundled as assets, offline-safe).
 abstract final class AppTypography {
   AppTypography._();

@@ -32,6 +32,7 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+/dist/
 
 # Symbolication related
 app.*.symbols
@@ -49,3 +50,6 @@ app.*.map.json
 
 # IA
 .agents
+
+# OpenCode — config local con rutas absolutas por SO (ver README → MCP de Dart)
+opencode.json
