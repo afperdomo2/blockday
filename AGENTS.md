@@ -122,9 +122,22 @@ lo resuelven solos desde `~/Documentos/flutter`, `~/flutter`, snap, `/opt` o
 | Tarea | Skill |
 |---|---|
 | UI/UX, sistema de diseño, accesibilidad, motion | `ui-ux-pro-max` (ver `docs/DESIGN_SYSTEM.md`) |
-| Implementar animaciones en Flutter | `flutter-animations` |
-| Arquitectura, Riverpod, GoRouter, widgets, rendimiento | `flutter-expert` (ver `references/`) |
+| Animaciones y motion en Flutter | `flutter-animations` |
+| Arquitectura por capas de la app | `flutter-apply-architecture-best-practices` |
+| Layout responsive/adaptativo | `flutter-build-responsive-layout` |
+| Bugs de layout (overflow, constraints sin límite) | `flutter-fix-layout-issues` |
+| Navegación con go_router / rutas declarativas | `flutter-setup-declarative-routing` |
+| Widget tests de pantallas y componentes | `flutter-add-widget-test` |
+| Drift, SQLite, migraciones y CRUD local | `flutter-drift` |
+| Tests unitarios de dominio (recurrencia, modelos) | `dart-add-unit-test` |
+| Análisis estático y fixes de lint | `dart-run-static-analysis` |
 | Estilo y buenas prácticas de Dart | `dart-best-practices` |
+
+- Riverpod: el proyecto usa `flutter_riverpod` 3 con providers manuales
+  (`Notifier` / `NotifierProvider`), **sin codegen** (`riverpod_generator`).
+  Para la API exacta, consultar context7 antes de escribir providers nuevos.
+- Si una skill no aparece en `.agents/skills/`, restaurarlas con
+  `npx skills experimental_install`.
 
 ## Documentación de librerías
 
