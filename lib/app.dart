@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/theme/app_theme.dart';
+import 'features/notifications/providers/notifications_providers.dart';
 import 'features/settings/domain/app_settings.dart';
 import 'features/settings/providers/settings_providers.dart';
 import 'routes/app_router.dart';
@@ -12,6 +13,7 @@ class BlockdayApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(notificationsBootstrapProvider);
     final settings = ref.watch(currentSettingsProvider);
     return MaterialApp.router(
       title: 'Blockday',

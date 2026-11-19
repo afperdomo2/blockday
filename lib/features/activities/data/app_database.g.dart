@@ -659,6 +659,17 @@ class $ActivitiesTable extends Activities
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _reminderMinutesMeta = const VerificationMeta(
+    'reminderMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> reminderMinutes = GeneratedColumn<int>(
+    'reminder_minutes',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _taskIdMeta = const VerificationMeta('taskId');
   @override
   late final GeneratedColumn<String> taskId = GeneratedColumn<String>(
@@ -684,6 +695,7 @@ class $ActivitiesTable extends Activities
     endMinutes,
     endType,
     endValue,
+    reminderMinutes,
     taskId,
   ];
   @override
@@ -787,6 +799,15 @@ class $ActivitiesTable extends Activities
         endValue.isAcceptableOrUnknown(data['end_value']!, _endValueMeta),
       );
     }
+    if (data.containsKey('reminder_minutes')) {
+      context.handle(
+        _reminderMinutesMeta,
+        reminderMinutes.isAcceptableOrUnknown(
+          data['reminder_minutes']!,
+          _reminderMinutesMeta,
+        ),
+      );
+    }
     if (data.containsKey('task_id')) {
       context.handle(
         _taskIdMeta,
@@ -854,6 +875,10 @@ class $ActivitiesTable extends Activities
         DriftSqlType.int,
         data['${effectivePrefix}end_value'],
       ),
+      reminderMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reminder_minutes'],
+      ),
       taskId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}task_id'],
@@ -881,6 +906,7 @@ class Activity extends DataClass implements Insertable<Activity> {
   final int? endMinutes;
   final String? endType;
   final int? endValue;
+  final int? reminderMinutes;
   final String? taskId;
   const Activity({
     required this.id,
@@ -896,6 +922,7 @@ class Activity extends DataClass implements Insertable<Activity> {
     this.endMinutes,
     this.endType,
     this.endValue,
+    this.reminderMinutes,
     this.taskId,
   });
   @override
@@ -931,6 +958,9 @@ class Activity extends DataClass implements Insertable<Activity> {
     }
     if (!nullToAbsent || endValue != null) {
       map['end_value'] = Variable<int>(endValue);
+    }
+    if (!nullToAbsent || reminderMinutes != null) {
+      map['reminder_minutes'] = Variable<int>(reminderMinutes);
     }
     if (!nullToAbsent || taskId != null) {
       map['task_id'] = Variable<String>(taskId);
@@ -971,6 +1001,9 @@ class Activity extends DataClass implements Insertable<Activity> {
       endValue: endValue == null && nullToAbsent
           ? const Value.absent()
           : Value(endValue),
+      reminderMinutes: reminderMinutes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reminderMinutes),
       taskId: taskId == null && nullToAbsent
           ? const Value.absent()
           : Value(taskId),
@@ -996,6 +1029,7 @@ class Activity extends DataClass implements Insertable<Activity> {
       endMinutes: serializer.fromJson<int?>(json['endMinutes']),
       endType: serializer.fromJson<String?>(json['endType']),
       endValue: serializer.fromJson<int?>(json['endValue']),
+      reminderMinutes: serializer.fromJson<int?>(json['reminderMinutes']),
       taskId: serializer.fromJson<String?>(json['taskId']),
     );
   }
@@ -1016,6 +1050,7 @@ class Activity extends DataClass implements Insertable<Activity> {
       'endMinutes': serializer.toJson<int?>(endMinutes),
       'endType': serializer.toJson<String?>(endType),
       'endValue': serializer.toJson<int?>(endValue),
+      'reminderMinutes': serializer.toJson<int?>(reminderMinutes),
       'taskId': serializer.toJson<String?>(taskId),
     };
   }
@@ -1034,6 +1069,7 @@ class Activity extends DataClass implements Insertable<Activity> {
     Value<int?> endMinutes = const Value.absent(),
     Value<String?> endType = const Value.absent(),
     Value<int?> endValue = const Value.absent(),
+    Value<int?> reminderMinutes = const Value.absent(),
     Value<String?> taskId = const Value.absent(),
   }) => Activity(
     id: id ?? this.id,
@@ -1049,6 +1085,9 @@ class Activity extends DataClass implements Insertable<Activity> {
     endMinutes: endMinutes.present ? endMinutes.value : this.endMinutes,
     endType: endType.present ? endType.value : this.endType,
     endValue: endValue.present ? endValue.value : this.endValue,
+    reminderMinutes: reminderMinutes.present
+        ? reminderMinutes.value
+        : this.reminderMinutes,
     taskId: taskId.present ? taskId.value : this.taskId,
   );
   Activity copyWithCompanion(ActivitiesCompanion data) {
@@ -1072,6 +1111,9 @@ class Activity extends DataClass implements Insertable<Activity> {
           : this.endMinutes,
       endType: data.endType.present ? data.endType.value : this.endType,
       endValue: data.endValue.present ? data.endValue.value : this.endValue,
+      reminderMinutes: data.reminderMinutes.present
+          ? data.reminderMinutes.value
+          : this.reminderMinutes,
       taskId: data.taskId.present ? data.taskId.value : this.taskId,
     );
   }
@@ -1092,6 +1134,7 @@ class Activity extends DataClass implements Insertable<Activity> {
           ..write('endMinutes: $endMinutes, ')
           ..write('endType: $endType, ')
           ..write('endValue: $endValue, ')
+          ..write('reminderMinutes: $reminderMinutes, ')
           ..write('taskId: $taskId')
           ..write(')'))
         .toString();
@@ -1112,6 +1155,7 @@ class Activity extends DataClass implements Insertable<Activity> {
     endMinutes,
     endType,
     endValue,
+    reminderMinutes,
     taskId,
   );
   @override
@@ -1131,6 +1175,7 @@ class Activity extends DataClass implements Insertable<Activity> {
           other.endMinutes == this.endMinutes &&
           other.endType == this.endType &&
           other.endValue == this.endValue &&
+          other.reminderMinutes == this.reminderMinutes &&
           other.taskId == this.taskId);
 }
 
@@ -1148,6 +1193,7 @@ class ActivitiesCompanion extends UpdateCompanion<Activity> {
   final Value<int?> endMinutes;
   final Value<String?> endType;
   final Value<int?> endValue;
+  final Value<int?> reminderMinutes;
   final Value<String?> taskId;
   final Value<int> rowid;
   const ActivitiesCompanion({
@@ -1164,6 +1210,7 @@ class ActivitiesCompanion extends UpdateCompanion<Activity> {
     this.endMinutes = const Value.absent(),
     this.endType = const Value.absent(),
     this.endValue = const Value.absent(),
+    this.reminderMinutes = const Value.absent(),
     this.taskId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -1181,6 +1228,7 @@ class ActivitiesCompanion extends UpdateCompanion<Activity> {
     this.endMinutes = const Value.absent(),
     this.endType = const Value.absent(),
     this.endValue = const Value.absent(),
+    this.reminderMinutes = const Value.absent(),
     this.taskId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -1201,6 +1249,7 @@ class ActivitiesCompanion extends UpdateCompanion<Activity> {
     Expression<int>? endMinutes,
     Expression<String>? endType,
     Expression<int>? endValue,
+    Expression<int>? reminderMinutes,
     Expression<String>? taskId,
     Expression<int>? rowid,
   }) {
@@ -1218,6 +1267,7 @@ class ActivitiesCompanion extends UpdateCompanion<Activity> {
       if (endMinutes != null) 'end_minutes': endMinutes,
       if (endType != null) 'end_type': endType,
       if (endValue != null) 'end_value': endValue,
+      if (reminderMinutes != null) 'reminder_minutes': reminderMinutes,
       if (taskId != null) 'task_id': taskId,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1237,6 +1287,7 @@ class ActivitiesCompanion extends UpdateCompanion<Activity> {
     Value<int?>? endMinutes,
     Value<String?>? endType,
     Value<int?>? endValue,
+    Value<int?>? reminderMinutes,
     Value<String?>? taskId,
     Value<int>? rowid,
   }) {
@@ -1254,6 +1305,7 @@ class ActivitiesCompanion extends UpdateCompanion<Activity> {
       endMinutes: endMinutes ?? this.endMinutes,
       endType: endType ?? this.endType,
       endValue: endValue ?? this.endValue,
+      reminderMinutes: reminderMinutes ?? this.reminderMinutes,
       taskId: taskId ?? this.taskId,
       rowid: rowid ?? this.rowid,
     );
@@ -1301,6 +1353,9 @@ class ActivitiesCompanion extends UpdateCompanion<Activity> {
     if (endValue.present) {
       map['end_value'] = Variable<int>(endValue.value);
     }
+    if (reminderMinutes.present) {
+      map['reminder_minutes'] = Variable<int>(reminderMinutes.value);
+    }
     if (taskId.present) {
       map['task_id'] = Variable<String>(taskId.value);
     }
@@ -1326,6 +1381,7 @@ class ActivitiesCompanion extends UpdateCompanion<Activity> {
           ..write('endMinutes: $endMinutes, ')
           ..write('endType: $endType, ')
           ..write('endValue: $endValue, ')
+          ..write('reminderMinutes: $reminderMinutes, ')
           ..write('taskId: $taskId, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -2314,6 +2370,7 @@ typedef $$ActivitiesTableCreateCompanionBuilder = ActivitiesCompanion Function({
   Value<int?> endMinutes,
   Value<String?> endType,
   Value<int?> endValue,
+  Value<int?> reminderMinutes,
   Value<String?> taskId,
   Value<int> rowid,
 });
@@ -2331,6 +2388,7 @@ typedef $$ActivitiesTableUpdateCompanionBuilder = ActivitiesCompanion Function({
   Value<int?> endMinutes,
   Value<String?> endType,
   Value<int?> endValue,
+  Value<int?> reminderMinutes,
   Value<String?> taskId,
   Value<int> rowid,
 });
@@ -2469,6 +2527,11 @@ class $$ActivitiesTableFilterComposer
 
   ColumnFilters<int> get endValue => $composableBuilder(
     column: $table.endValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get reminderMinutes => $composableBuilder(
+    column: $table.reminderMinutes,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2620,6 +2683,11 @@ class $$ActivitiesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get reminderMinutes => $composableBuilder(
+    column: $table.reminderMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$TasksTableOrderingComposer get taskId {
     final $$TasksTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -2697,6 +2765,11 @@ class $$ActivitiesTableAnnotationComposer
 
   GeneratedColumn<int> get endValue =>
       $composableBuilder(column: $table.endValue, builder: (column) => column);
+
+  GeneratedColumn<int> get reminderMinutes => $composableBuilder(
+    column: $table.reminderMinutes,
+    builder: (column) => column,
+  );
 
   $$TasksTableAnnotationComposer get taskId {
     final $$TasksTableAnnotationComposer composer = $composerBuilder(
@@ -2818,6 +2891,7 @@ class $$ActivitiesTableTableManager
                 Value<int?> endMinutes = const Value.absent(),
                 Value<String?> endType = const Value.absent(),
                 Value<int?> endValue = const Value.absent(),
+                Value<int?> reminderMinutes = const Value.absent(),
                 Value<String?> taskId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ActivitiesCompanion(
@@ -2834,6 +2908,7 @@ class $$ActivitiesTableTableManager
                 endMinutes: endMinutes,
                 endType: endType,
                 endValue: endValue,
+                reminderMinutes: reminderMinutes,
                 taskId: taskId,
                 rowid: rowid,
               ),
@@ -2852,6 +2927,7 @@ class $$ActivitiesTableTableManager
                 Value<int?> endMinutes = const Value.absent(),
                 Value<String?> endType = const Value.absent(),
                 Value<int?> endValue = const Value.absent(),
+                Value<int?> reminderMinutes = const Value.absent(),
                 Value<String?> taskId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ActivitiesCompanion.insert(
@@ -2868,6 +2944,7 @@ class $$ActivitiesTableTableManager
                 endMinutes: endMinutes,
                 endType: endType,
                 endValue: endValue,
+                reminderMinutes: reminderMinutes,
                 taskId: taskId,
                 rowid: rowid,
               ),

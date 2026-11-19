@@ -20,6 +20,10 @@ Roadmap de trabajo: `docs/TASKS.md`
   (Linux se usa además para desarrollo y pruebas fuera de Windows).
 - Estado: **Riverpod** (`flutter_riverpod`).
 - Persistencia local offline: **Drift** (SQLite). Requiere `build_runner`.
+- Preferencias: **shared_preferences** (detrás de `SettingsStore`, con
+  implementación en memoria para tests).
+- Notificaciones: **flutter_local_notifications** + `timezone`/`flutter_timezone`
+  (recordatorios; interfaz `NotificationService` con fake para tests).
 - Navegación: **go_router**.
 - Fechas/formato: **intl** (locale `es`).
 - UI en **español** (strings hardcodeados, sin i18n por ahora).

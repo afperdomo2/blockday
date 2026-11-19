@@ -9,6 +9,7 @@ import '../../../../core/responsive/constrained_content.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/date_format.dart';
 import '../../../backlog/providers/tasks_providers.dart';
+import '../../../notifications/providers/notifications_providers.dart';
 import '../../../settings/providers/settings_providers.dart';
 import '../../domain/activity.dart';
 import '../../domain/recurrence_end.dart';
@@ -46,6 +47,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
   final _notesCtrl = TextEditingController();
   final _countCtrl = TextEditingController(text: '4');
   int _color = 0;
+  int? _reminderMinutes;
   _EditorMode _mode = _EditorMode.single;
   DateTime _singleDate = DateTime.now();
   TimeOfDay _singleStart = const TimeOfDay(hour: 9, minute: 0);
@@ -187,6 +189,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
     _color = a.color;
     _excludedDates = a.excludedDates;
     _taskId = a.taskId;
+    _reminderMinutes = a.reminderMinutes;
     if (a.kind == ActivityKind.single) {
       _mode = _EditorMode.single;
       _singleDate = DateTime(
@@ -380,6 +383,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
         singleEnd: end,
         excludedDates: _excludedDates,
         taskId: _taskId,
+        reminderMinutes: _reminderMinutes,
       );
     } else {
       RecurrenceEnd end;
@@ -405,11 +409,17 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
         ),
         excludedDates: _excludedDates,
         taskId: _taskId,
+        reminderMinutes: _reminderMinutes,
       );
     }
 
     try {
       await ref.read(activitiesRepositoryProvider).save(activity);
+      final reminders = ref.read(remindersControllerProvider);
+      if (_reminderMinutes != null) {
+        await reminders.requestPermissions();
+      }
+      await reminders.rescheduleAll();
       if (mounted) context.go(_returnTo);
     } catch (e) {
       if (mounted) {
@@ -445,6 +455,7 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
     );
     if (confirm != true) return;
     await ref.read(activitiesRepositoryProvider).delete(id);
+    await ref.read(remindersControllerProvider).rescheduleAll();
     if (mounted) context.go(_returnTo);
   }
 
@@ -792,6 +803,36 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
                       },
                     ),
                 ],
+                const SizedBox(height: AppSpacing.lg),
+                DropdownButtonFormField<int?>(
+                  initialValue: _reminderMinutes,
+                  decoration: const InputDecoration(
+                    labelText: 'Recordatorio',
+                    border: OutlineInputBorder(),
+                  ),
+                  hint: const Text('Sin recordatorio'),
+                  items: const [
+                    DropdownMenuItem(
+                      value: null,
+                      child: Text('Sin recordatorio'),
+                    ),
+                    DropdownMenuItem(value: 5, child: Text('5 minutos antes')),
+                    DropdownMenuItem(
+                      value: 10,
+                      child: Text('10 minutos antes'),
+                    ),
+                    DropdownMenuItem(
+                      value: 15,
+                      child: Text('15 minutos antes'),
+                    ),
+                    DropdownMenuItem(
+                      value: 30,
+                      child: Text('30 minutos antes'),
+                    ),
+                    DropdownMenuItem(value: 60, child: Text('1 hora antes')),
+                  ],
+                  onChanged: (v) => setState(() => _reminderMinutes = v),
+                ),
               ],
             ),
           ),

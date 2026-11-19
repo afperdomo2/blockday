@@ -16,6 +16,7 @@ class Activity {
     this.rule,
     Set<DateTime>? excludedDates,
     this.taskId,
+    this.reminderMinutes,
   }) : excludedDates = excludedDates == null
            ? const {}
            : Set.unmodifiable(
@@ -23,6 +24,14 @@ class Activity {
              ) {
     if (title.trim().isEmpty) {
       throw ArgumentError.value(title, 'title', 'No puede estar vacío');
+    }
+    if (reminderMinutes != null &&
+        (reminderMinutes! < 0 || reminderMinutes! > maxReminderMinutes)) {
+      throw ArgumentError.value(
+        reminderMinutes,
+        'reminderMinutes',
+        'Debe estar entre 0 y $maxReminderMinutes',
+      );
     }
     if (kind == ActivityKind.single) {
       if (singleStart == null || singleEnd == null) {
@@ -63,6 +72,9 @@ class Activity {
   final RecurrenceRule? rule;
   final Set<DateTime> excludedDates;
   final String? taskId;
+  final int? reminderMinutes;
+
+  static const int maxReminderMinutes = 1440;
 
   Activity copyWith({
     String? id,
@@ -75,8 +87,10 @@ class Activity {
     RecurrenceRule? rule,
     Set<DateTime>? excludedDates,
     String? taskId,
+    int? reminderMinutes,
     bool clearNotes = false,
     bool clearTaskId = false,
+    bool clearReminderMinutes = false,
   }) {
     return Activity(
       id: id ?? this.id,
@@ -89,6 +103,9 @@ class Activity {
       rule: rule ?? this.rule,
       excludedDates: excludedDates ?? this.excludedDates,
       taskId: clearTaskId ? null : (taskId ?? this.taskId),
+      reminderMinutes: clearReminderMinutes
+          ? null
+          : (reminderMinutes ?? this.reminderMinutes),
     );
   }
 
@@ -206,7 +223,8 @@ class Activity {
       singleEnd == other.singleEnd &&
       rule == other.rule &&
       _setEquals(excludedDates, other.excludedDates) &&
-      taskId == other.taskId;
+      taskId == other.taskId &&
+      reminderMinutes == other.reminderMinutes;
 
   @override
   int get hashCode => Object.hash(
@@ -220,6 +238,7 @@ class Activity {
     rule,
     excludedDates.length,
     taskId,
+    reminderMinutes,
   );
 
   @override

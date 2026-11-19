@@ -35,6 +35,7 @@ class Activities extends Table {
   IntColumn get endMinutes => integer().nullable()();
   TextColumn get endType => text().nullable()();
   IntColumn get endValue => integer().nullable()();
+  IntColumn get reminderMinutes => integer().nullable()();
   TextColumn get taskId => text().nullable().customConstraint(
     'NULL REFERENCES tasks(id) ON DELETE SET NULL',
   )();
@@ -72,7 +73,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -94,6 +95,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 4) {
         await m.addColumn(tasks, tasks.tags);
+      }
+      if (from < 5) {
+        await m.addColumn(activities, activities.reminderMinutes);
       }
     },
     beforeOpen: (details) async {

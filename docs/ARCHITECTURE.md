@@ -9,6 +9,7 @@
 | Estado | `flutter_riverpod` | Testeable, sin `setState` global |
 | Persistencia | `drift` (SQLite) | SQL real, queries por rango de fechas, DB en memoria para tests |
 | Preferencias | `shared_preferences` | Prefs ligeras (tema, inicio de semana, 12/24h), sin migración |
+| Notificaciones | `flutter_local_notifications` + `timezone` | Recordatorios locales en Android, Linux y Windows |
 | Navegación | `go_router` | Rutas declarativas, deep-linking futuro |
 | Fechas | `intl` (locale `es`) | Formato en español |
 | Modelos | Dart inmutables a mano | Sin freezed/json_serializable (menos codegen) |
@@ -41,6 +42,10 @@ lib/
 │   ├── home/
 │   │   ├── presentation/  # dashboard Inicio
 │   │   └── providers/     # resumen semanal
+│   ├── notifications/
+│   │   ├── domain/     # reminder_schedule (cálculo de disparos, puro)
+│   │   ├── data/       # NotificationService (plugin + fake)
+│   │   └── providers/  # remindersController, bootstrap
 │   ├── settings/
 │   │   ├── domain/     # AppSettings, ThemePreference, WeekStart (puro)
 │   │   ├── data/       # SettingsStore (shared_preferences + in-memory)
@@ -181,6 +186,9 @@ Tests con `NativeDatabase.memory()` / executor en memoria.
   rango visible (family provider).
 - `settingsStoreProvider` / `settingsProvider` (AsyncNotifier) /
   `currentSettingsProvider` → preferencias (tema, inicio de semana, 12/24h).
+- `notificationServiceProvider` / `remindersControllerProvider` /
+  `notificationsBootstrapProvider` → recordatorios (agenda 2 semanas de
+  horizonte; se reprograma al guardar/eliminar actividad y al arrancar).
 
 ## Navegación
 

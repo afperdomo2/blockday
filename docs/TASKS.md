@@ -278,12 +278,37 @@ Notas de implementación:
 
 ## Hito 23 — Notificaciones/recordatorios
 
-- [ ] Añadir `flutter_local_notifications` + `timezone`
-- [ ] Migración schema 2→3: campo recordatorio por actividad
+- [x] Añadir `flutter_local_notifications` + `timezone`
+- [x] Migración schema 2→3: campo recordatorio por actividad
       (o recordatorio global por defecto)
-- [ ] Programar/cancelar notificaciones al guardar/eliminar
-- [ ] Permisos Android + canal de notificaciones Windows
-- [ ] Tests de la lógica de programación (tiempo de disparo)
+- [x] Programar/cancelar notificaciones al guardar/eliminar
+- [x] Permisos Android + canal de notificaciones Windows
+- [x] Tests de la lógica de programación (tiempo de disparo)
+
+Notas de implementación:
+- Dependencias: `flutter_local_notifications` 23 (soporta Android, Linux y
+  Windows), `timezone` y `flutter_timezone` (zona horaria local).
+- Schema 4→5 (la numeración real: 3 tags → 4): columna
+  `activities.reminderMinutes` (minutos antes del inicio; null = sin
+  recordatorio). La UI ofrece 5/10/15/30/60 min.
+- Lógica pura en `lib/features/notifications/domain/reminder_schedule.dart`:
+  `computeReminders()` (disparo = inicio − minutos; descarta pasados; respeta
+  exclusiones y horizonte de 14 días) y `reminderNotificationId()` (hash
+  estable de 31 bits por actividad+fecha).
+- `NotificationService` (interfaz) con `LocalNotificationService` (plugin,
+  `zonedSchedule` + `AndroidScheduleMode.exactAllowWhileIdle`, canal
+  `blockday_reminders`, init de Windows/Linux) y `FakeNotificationService`
+  para tests. Los errores de plugin se tragan (best-effort).
+- `RemindersController.rescheduleAll()` reprograma todo (cancelAll + agenda las
+  próximas 2 semanas) al guardar/eliminar actividad y al arrancar la app
+  (`notificationsBootstrapProvider` en `BlockdayApp`). Si hay recordatorio se
+  piden permisos Android (`requestNotificationsPermission` +
+  `requestExactAlarmsPermission`).
+- Android: permisos `RECEIVE_BOOT_COMPLETED` y `SCHEDULE_EXACT_ALARM` + receivers
+  `ScheduledNotificationReceiver`/`ScheduledNotificationBootReceiver` en el
+  manifest (sobreviven a kill/reboot).
+- Nota Windows: sin MSIX `cancel` es no-op (limitación del plugin); la
+  reprogramación acumula como mucho 2 semanas de avisos.
 
 ## Hito 24 — Linux, versionado y distribución
 
