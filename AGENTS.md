@@ -55,6 +55,7 @@ lo resuelven solos desde `~/Documentos/flutter`, `~/flutter`, snap, `/opt` o
 ./scripts/build-deb.sh [--no-bump]                 # .deb en dist/
 ./scripts/build-apk.sh [--no-bump]                 # APK en dist/
 ./scripts/install-linux.sh [--uninstall]           # instala en ~/.local
+./scripts/generate-icons.sh                        # iconos de todas las plataformas desde brand/
 ```
 
 - La versión vive **solo** en `pubspec.yaml` (`x.y.z+N`). No duplicarla en
@@ -162,6 +163,9 @@ No confiar en memoria: las APIs cambian.
 - `docs/` — fuente de verdad de producto, arquitectura, diseño y roadmap
   (ver índice más abajo). No hay carpeta `context/`: lo que necesita un agente
   está aquí y enlazado desde `AGENTS.md`.
+- `brand/` — SVG maestros del icono de la app (`icon.svg`, `mark.svg`,
+  `mark-mono.svg`). Se rasterizan con `scripts/generate-icons.sh`; los PNG/ICO
+  generados se commitean pero no se editan a mano.
 - Nunca commitear rutas absolutas de una máquina concreta.
 
 ## Plataformas y despliegue
@@ -181,6 +185,10 @@ No confiar en memoria: las APIs cambian.
   instalación local en `~/.local/opt/blockday/` + `~/.local/bin/blockday`.
 - El icono de Linux es `linux/blockday.png` y la entrada de menú
   `linux/blockday.desktop` (con marcador `@EXEC@` que reemplazan los scripts).
+- El icono de la app se define una sola vez en `brand/` (SVG) y se rasteriza
+  con `scripts/generate-icons.sh`: `linux/blockday.png`, mipmaps de Android
+  (legacy + adaptive + monocromo) y `windows/runner/resources/app_icon.ico`.
+  Los PNG/ICO generados no se editan a mano.
 - `dist/` y `build/` están en `.gitignore`: nunca commitear artefactos.
 
 ## Documentación (índice)

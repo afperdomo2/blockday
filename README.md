@@ -24,6 +24,7 @@ viven en un SQLite local, sin cuenta ni servidor.
   - [Linux — instalación local](#install)
   - [Android — APK](#apk)
   - [Windows](#windows)
+  - [Icono de la app](#icono)
 - [MCP de Dart en OpenCode (opcional)](#mcp)
 
 ---
@@ -257,6 +258,28 @@ También se puede copiar el APK al teléfono y abrirlo desde el gestor de archiv
 
 El ejecutable y sus DLL quedan en `build/windows/x64/runner/Release/`; se
 distribuye copiando esa carpeta completa.
+
+<a id="icono"></a>
+
+### 🎨 Icono de la app
+
+El icono se define una sola vez en `brand/` (SVG) y se rasteriza para todas
+las plataformas con Chrome + Pillow:
+
+```sh
+./scripts/generate-icons.sh
+```
+
+| Salida | Uso |
+|---|---|
+| `linux/blockday.png` (192px) | icono de escritorio (`hicolor/192x192`) |
+| `android/.../mipmap-*/ic_launcher*.png` | launcher legacy, adaptive y monocromo (temático) |
+| `windows/runner/resources/app_icon.ico` | icono de Windows (16→256px) |
+
+Los PNG/ICO generados se commitean pero **no se editan a mano**: para cambiar
+el icono se modifican los SVG de `brand/` y se vuelve a correr el script. El
+detalle de la marca (paleta, zona segura de Android) está en
+[`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md).
 
 ---
 

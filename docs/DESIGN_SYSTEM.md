@@ -40,6 +40,34 @@
 
 **Color Notes:** Calendar blue + event green
 
+### Marca / Icono
+
+**Concepto:** página de calendario blanca con dos argollas azules y tres
+bloques de tiempo (primario, acento claro y verde de éxito) sobre un tile
+slate `#0F172A` con esquinas de 112px en un lienzo de 512px y un trazo interior
+sutil `#94A3B8` al 20%.
+
+**Fuentes (SVG maestros, `brand/`):**
+
+| Archivo | Contenido | Uso |
+|---|---|---|
+| `brand/icon.svg` | tile completo con colores | Linux, Windows, launcher legacy de Android |
+| `brand/mark.svg` | glifo suelto con colores | foreground del adaptive icon de Android |
+| `brand/mark-mono.svg` | glifo monocromo (`currentColor`) con los bloques como huecos | icono temático de Android 13+ |
+
+**Generación:** `scripts/generate-icons.sh` rasteriza los SVG con Chrome
+headless y deriva todos los PNG/ICO (no editar los generados a mano):
+
+- `linux/blockday.png` (192px, instalado como `hicolor/192x192`)
+- `android/.../mipmap-*/ic_launcher{,_foreground,_monochrome}.png` +
+  `mipmap-anydpi-v26/ic_launcher.xml` + `values/ic_launcher_background.xml`
+- `windows/runner/resources/app_icon.ico` (16→256px)
+
+**Zona segura de Android:** el lienzo del adaptive icon es 108dp y solo se
+garantiza visible el círculo central de 66dp; el glifo se renderiza al 80%
+para entrar completo en cualquier máscara (círculo, squircle, cuadrado
+redondeado).
+
 ### Typography
 
 - **Heading Font:** Plus Jakarta Sans
