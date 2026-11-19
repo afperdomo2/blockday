@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/responsive/constrained_content.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/section_header.dart';
 import '../../../../shared/widgets/settings_action.dart';
 import '../../../../shared/widgets/staggered_entrance.dart';
@@ -96,11 +97,10 @@ class _BacklogScreenState extends ConsumerState<BacklogScreen> {
                   _buildStatusFilter(context),
                   const Expanded(
                     child: Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(AppSpacing.xxl),
-                        child: Text(
-                          'Sin tareas aún.\nCrea una con el botón + y luego prográmala en el calendario.',
-                          textAlign: TextAlign.center,
+                      child: SingleChildScrollView(
+                        child: EmptyState(
+                          icon: Icons.inbox_outlined,
+                          title: 'Sin tareas aún.\nCrea una con el botón + y luego prográmala en el calendario.',
                         ),
                       ),
                     ),
@@ -118,19 +118,14 @@ class _BacklogScreenState extends ConsumerState<BacklogScreen> {
                 Expanded(
                   child: filtered.isEmpty
                       ? Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(AppSpacing.xxl),
-                            child: Text(
-                              _searchQuery.isEmpty
+                          child: SingleChildScrollView(
+                            child: EmptyState(
+                              icon: _searchQuery.isEmpty
+                                  ? Icons.inbox_outlined
+                                  : Icons.search_off_outlined,
+                              title: _searchQuery.isEmpty
                                   ? 'Sin tareas'
                                   : 'Sin resultados para "$_searchQuery"',
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
                             ),
                           ),
                         )

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/date_format.dart';
 import '../../../activities/domain/occurrence.dart';
 import '../../../settings/providers/settings_providers.dart';
+import 'now_line.dart';
 import 'time_grid_column.dart';
 
 class TimeGrid extends ConsumerStatefulWidget {
@@ -115,33 +116,15 @@ class _TimeGridState extends ConsumerState<TimeGrid> {
               ],
             ),
             if (_now != null && _nowTop != null)
-              _buildNowIndicator(colorScheme),
+              Positioned(
+                top: _nowTop - 3,
+                left: 0,
+                right: 0,
+                height: 8,
+                child: NowLine(leadingWidth: TimeGrid.gutterWidth - 10),
+              ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildNowIndicator(ColorScheme scheme) {
-    return Positioned(
-      top: _nowTop!,
-      left: 0,
-      right: 0,
-      height: 2,
-      child: Row(
-        children: [
-          SizedBox(width: TimeGrid.gutterWidth - 6),
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: scheme.primary,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 2),
-          Expanded(child: Container(height: 2, color: scheme.primary)),
-        ],
       ),
     );
   }

@@ -13,6 +13,10 @@ abstract final class AppMotion {
 
   static const Curve enter = Curves.easeOutCubic;
   static const Curve exit = Curves.easeInCubic;
+  static const Curve spring = Curves.easeOutBack;
+
+  /// Visual scale applied while a card/tile is pressed (no layout shift).
+  static const double pressScale = 0.98;
 
   /// Whether the user prefers reduced motion; gate non-essential animations.
   static bool reduceMotion(BuildContext context) =>

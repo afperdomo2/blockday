@@ -5,8 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/responsive/app_breakpoints.dart';
 import '../../../../core/responsive/constrained_content.dart';
 import '../../../../core/theme/app_motion.dart';
+import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/date_format.dart';
+import '../../../../shared/widgets/brand_mark.dart';
+import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/search_action.dart';
 import '../../../../shared/widgets/settings_action.dart';
 import '../../../activities/domain/occurrence.dart';
@@ -57,7 +60,15 @@ class CalendarScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Blockday'),
+        title: Row(
+          children: [
+            const BrandMark(size: 26),
+            const SizedBox(width: AppSpacing.sm),
+            const Expanded(
+              child: Text('Blockday', overflow: TextOverflow.ellipsis),
+            ),
+          ],
+        ),
         centerTitle: false,
         actions: [
           if (!isToday)
@@ -207,14 +218,10 @@ class CalendarScreen extends ConsumerWidget {
           ),
         ),
         if (occurrences.isEmpty)
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              'Sin actividades para este día',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
+          const EmptyHint(
+            icon: Icons.event_busy_outlined,
+            text: 'Sin actividades para este día',
+            padding: EdgeInsets.all(AppSpacing.lg),
           ),
       ],
     );
@@ -228,13 +235,34 @@ class _DateChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Text(
-        formatDayHeader(date),
-        style: Theme.of(context).textTheme.titleSmall,
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      child: AnimatedContainer(
+        key: ValueKey('date-chip-${date.millisecondsSinceEpoch}'),
+        duration: AppMotion.reduceMotion(context)
+            ? Duration.zero
+            : AppMotion.fast,
+        curve: AppMotion.enter,
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: cs.primaryContainer.withValues(alpha: 0.5),
+          borderRadius: AppRadius.pillAll,
+        ),
+        child: Text(
+          formatDayHeader(date),
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            color: cs.onPrimaryContainer,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ),
     );
   }

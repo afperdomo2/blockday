@@ -11,6 +11,7 @@ import '../../../activities/domain/overlap_layout.dart';
 import '../../../settings/providers/settings_providers.dart';
 import '../../domain/drag_time.dart';
 import 'activity_block.dart';
+import 'now_line.dart';
 
 class TimeGridColumn extends ConsumerStatefulWidget {
   const TimeGridColumn({
@@ -243,26 +244,11 @@ class _TimeGridColumnState extends ConsumerState<TimeGridColumn> {
           ),
           if (_nowTop != null)
             Positioned(
-              top: _nowTop!,
+              top: _nowTop! - 3,
               left: 0,
               right: 0,
-              height: 2,
-              child: Row(
-                children: [
-                  Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 2),
-                  Expanded(
-                    child: Container(height: 2, color: colorScheme.primary),
-                  ),
-                ],
-              ),
+              height: 8,
+              child: const NowLine(),
             ),
         ],
       ),
@@ -300,11 +286,8 @@ class _TimeGridColumnState extends ConsumerState<TimeGridColumn> {
           background: ActivityColors.of(
             resizeDrag.occurrence.color,
             Theme.of(context).brightness,
-          ).background.withValues(alpha: 0.55),
-          foreground: ActivityColors.of(
-            resizeDrag.occurrence.color,
-            Theme.of(context).brightness,
-          ).foreground,
+          ).background.withValues(alpha: 0.25),
+          foreground: colorScheme.onSurface,
         ),
     ];
   }

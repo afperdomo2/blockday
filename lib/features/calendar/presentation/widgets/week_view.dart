@@ -14,6 +14,7 @@ import '../../../activities/providers/activities_stream_provider.dart';
 import '../../../settings/domain/app_settings.dart';
 import '../../../settings/providers/settings_providers.dart';
 import 'days_header.dart';
+import 'now_line.dart';
 
 class WeekView extends ConsumerStatefulWidget {
   const WeekView({super.key, required this.selectedDate});
@@ -244,30 +245,12 @@ class _WeekViewState extends ConsumerState<WeekView> {
                           _nowTop != null &&
                           _todayIndex != null)
                         Positioned(
-                          top: _nowTop!,
+                          top: _nowTop! - 3,
                           left:
                               WeekView.gutterWidth + _todayIndex! * columnWidth,
                           width: columnWidth,
-                          height: 2,
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: colorScheme.primary,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 2),
-                              Expanded(
-                                child: Container(
-                                  height: 2,
-                                  color: colorScheme.primary,
-                                ),
-                              ),
-                            ],
-                          ),
+                          height: 8,
+                          child: const NowLine(),
                         ),
                     ],
                   );
@@ -288,20 +271,27 @@ class _WeekBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ac = ActivityColors.of(
+    final cs = Theme.of(context).colorScheme;
+    final accent = ActivityColors.of(
       occurrence.color,
       Theme.of(context).brightness,
-    );
-    final bg = ac.background;
-    final fg = ac.foreground;
+    ).background;
     final isLinked = occurrence.isLinkedToTask;
     return GestureDetector(
       onTap: () =>
           context.go('/activity/${occurrence.activityId}?from=/calendar'),
       child: Container(
         decoration: BoxDecoration(
-          color: bg,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              accent.withValues(alpha: 0.22),
+              accent.withValues(alpha: 0.12),
+            ],
+          ),
           borderRadius: BorderRadius.circular(AppRadius.sm),
+          border: Border.all(color: accent.withValues(alpha: 0.5)),
         ),
         padding: EdgeInsets.symmetric(
           horizontal: compact ? AppSpacing.xxs : AppSpacing.xs,
@@ -316,14 +306,21 @@ class _WeekBlock extends StatelessWidget {
                     (compact
                             ? AppTypography.weekBlockCompact
                             : AppTypography.weekBlock)
-                        .copyWith(color: fg),
+                        .copyWith(
+                          color: cs.onSurface,
+                          fontWeight: FontWeight.w700,
+                        ),
                 maxLines: compact ? 3 : 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             if (isLinked && !compact) ...[
-              const SizedBox(width: AppSpacing.xs),
-              Icon(Icons.link, size: 10, color: fg.withValues(alpha: 0.9)),
+              const SizedBox(width: AppSpacing.xxs),
+              Icon(
+                Icons.link,
+                size: 10,
+                color: cs.onSurfaceVariant.withValues(alpha: 0.9),
+              ),
             ],
           ],
         ),

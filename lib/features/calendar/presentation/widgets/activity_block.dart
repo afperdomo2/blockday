@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/activity_colors.dart';
+import '../../../../core/theme/app_icon_size.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -32,13 +33,12 @@ class ActivityBlock extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ac = ActivityColors.of(
+    final cs = Theme.of(context).colorScheme;
+    final ts = Theme.of(context).textTheme;
+    final accent = ActivityColors.of(
       occurrence.color,
       Theme.of(context).brightness,
-    );
-    final bg = ac.background;
-    final fg = ac.foreground;
-    final ts = Theme.of(context).textTheme;
+    ).background;
     final isLinked = occurrence.isLinkedToTask;
     final sessionsAsync = ref.watch(sessionsStreamProvider);
     final isCompleted =
@@ -66,64 +66,89 @@ class ActivityBlock extends ConsumerWidget {
           );
     }
 
-    final content = Material(
-      color: isCompleted ? bg.withValues(alpha: 0.62) : bg,
-      borderRadius: BorderRadius.circular(AppRadius.md),
-      elevation: 1,
-      child: GestureDetector(
-        behavior: HitTestBehavior.deferToChild,
-        onLongPress: isLinked ? null : () {},
-        child: InkWell(
-          onTap: onTap,
-          onLongPress: isLinked ? toggleSession : null,
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.xs,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+    final content = Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            accent.withValues(alpha: isCompleted ? 0.1 : 0.22),
+            accent.withValues(alpha: isCompleted ? 0.05 : 0.12),
+          ],
+        ),
+        borderRadius: AppRadius.mdAll,
+        border: Border.all(
+          color: accent.withValues(alpha: isCompleted ? 0.3 : 0.5),
+        ),
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: GestureDetector(
+          behavior: HitTestBehavior.deferToChild,
+          onLongPress: isLinked ? null : () {},
+          child: InkWell(
+            onTap: onTap,
+            onLongPress: isLinked ? toggleSession : null,
+            borderRadius: AppRadius.mdAll,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        occurrence.title,
-                        style: ts.labelLarge?.copyWith(
-                          color: fg,
-                          fontWeight: FontWeight.w600,
-                          decoration: isCompleted
-                              ? TextDecoration.lineThrough
-                              : null,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                Container(width: 3, color: accent),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xs,
                     ),
-                    if (isLinked) ...[
-                      const SizedBox(width: AppSpacing.xs),
-                      Icon(
-                        isCompleted ? Icons.check_circle : Icons.link,
-                        size: 14,
-                        color: fg.withValues(alpha: 0.9),
-                      ),
-                    ],
-                  ],
-                ),
-                Text(
-                  formatHourRange(
-                    occurrence.start,
-                    occurrence.end,
-                    use24Hour: ref
-                        .watch(currentSettingsProvider)
-                        .use24HourFormat,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                occurrence.title,
+                                style: ts.labelLarge?.copyWith(
+                                  color: cs.onSurface,
+                                  fontWeight: FontWeight.w700,
+                                  decoration: isCompleted
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (isLinked) ...[
+                              const SizedBox(width: AppSpacing.xs),
+                              Icon(
+                                isCompleted ? Icons.check_circle : Icons.link,
+                                size: AppIconSize.sm,
+                                color: isCompleted
+                                    ? accent
+                                    : cs.onSurfaceVariant,
+                              ),
+                            ],
+                          ],
+                        ),
+                        Text(
+                          formatHourRange(
+                            occurrence.start,
+                            occurrence.end,
+                            use24Hour: ref
+                                .watch(currentSettingsProvider)
+                                .use24HourFormat,
+                          ),
+                          style: ts.labelSmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                          maxLines: 1,
+                        ),
+                      ],
+                    ),
                   ),
-                  style: ts.labelSmall?.copyWith(
-                    color: fg.withValues(alpha: 0.85),
-                  ),
-                  maxLines: 1,
                 ),
               ],
             ),

@@ -106,10 +106,10 @@ lo resuelven solos desde `~/Documentos/flutter`, `~/flutter`, snap, `/opt` o
 - Strings de UI en español; resto del código en inglés.
 - Seguir `analysis_options.yaml` (flutter_lints).
 - UI: usar **tokens de diseño** de `lib/core/theme/` (colores, spacing, radius,
-  tipografía, motion) y leer `docs/DESIGN_SYSTEM.md` antes de tocar
-  cualquier pantalla/componente. Nada de hex/spacing/radius/fontSize crudos en
-  widgets; respetar `MediaQuery.disableAnimations` (reduced motion) y targets
-  táctiles >= 48dp.
+  tipografía, motion, sombras, icon sizes) y leer `docs/DESIGN_SYSTEM.md` antes
+  de tocar cualquier pantalla/componente. Nada de hex/spacing/radius/fontSize
+  crudos en widgets; respetar `MediaQuery.disableAnimations` (reduced motion) y
+  targets táctiles >= 48dp.
 - **Responsive (mobile-first)**: el layout cómodo es el de teléfono; en pantallas
   grandes se adapta, no se estira. Usar `context.windowSize` / `context.isCompact`
   (`lib/core/responsive/app_breakpoints.dart`) y acotar el contenido con

@@ -16,4 +16,5 @@ abstract final class AppRadius {
   static BorderRadius get mdAll => BorderRadius.circular(md);
   static BorderRadius get lgAll => BorderRadius.circular(lg);
   static BorderRadius get xlAll => BorderRadius.circular(xl);
+  static BorderRadius get pillAll => BorderRadius.circular(pill);
 }

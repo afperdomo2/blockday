@@ -18,40 +18,59 @@ abstract final class AppTypography {
 
     return themed.copyWith(
       displayLarge: themed.displayLarge?.copyWith(
-        fontWeight: FontWeight.w700,
-        letterSpacing: -0.5,
+        fontSize: 56,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -2,
+        height: 1,
+      ),
+      displaySmall: themed.displaySmall?.copyWith(
+        fontWeight: FontWeight.w800,
+        letterSpacing: -1,
         height: 1.05,
       ),
       headlineMedium: themed.headlineMedium?.copyWith(
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.4,
+      ),
+      headlineSmall: themed.headlineSmall?.copyWith(
         fontWeight: FontWeight.w700,
         letterSpacing: -0.3,
       ),
       titleLarge: themed.titleLarge?.copyWith(
         fontWeight: FontWeight.w700,
         letterSpacing: -0.2,
-        height: 1.1,
+        height: 1.15,
       ),
       titleMedium: themed.titleMedium?.copyWith(
         fontWeight: FontWeight.w600,
-        height: 1.2,
+        height: 1.25,
       ),
       titleSmall: themed.titleSmall?.copyWith(
         fontWeight: FontWeight.w600,
-        height: 1.2,
+        height: 1.25,
       ),
       bodyMedium: themed.bodyMedium?.copyWith(height: 1.5),
       bodySmall: themed.bodySmall?.copyWith(height: 1.4),
-      labelSmall: themed.labelSmall?.copyWith(letterSpacing: 0.3),
+      labelLarge: themed.labelLarge?.copyWith(
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.1,
+      ),
+      labelSmall: themed.labelSmall?.copyWith(
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.4,
+      ),
     );
   }
 
   static const TextStyle weekBlock = TextStyle(
     fontSize: 10,
     fontWeight: FontWeight.w600,
+    letterSpacing: 0.1,
   );
 
   static const TextStyle weekBlockCompact = TextStyle(
     fontSize: 9,
     fontWeight: FontWeight.w600,
+    letterSpacing: 0.1,
   );
 }

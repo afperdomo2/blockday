@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/theme/activity_colors.dart';
 import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/date_format.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
 import '../../../settings/domain/app_settings.dart';
@@ -46,10 +47,11 @@ class MonthView extends ConsumerWidget {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
           child: Text(
             DateFormat('MMMM y', 'es').format(selectedDate),
-            style: Theme.of(context).textTheme.titleMedium,
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.w700),
           ),
         ),
         _WeekdayHeader(weekStart: weekStart),
@@ -74,35 +76,48 @@ class MonthView extends ConsumerWidget {
                   '/activity/new?date=${date.toIso8601String()}&from=/calendar',
                 ),
                 child: Container(
-                  margin: const EdgeInsets.all(2),
+                  margin: const EdgeInsets.all(AppSpacing.xxs),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? Theme.of(context).colorScheme.primaryContainer
                         : isToday
-                        ? Theme.of(context).colorScheme.secondaryContainer
-                              .withValues(alpha: 0.5)
+                        ? Theme.of(context).colorScheme.primaryContainer
+                              .withValues(alpha: 0.35)
                         : null,
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    border: isToday
-                        ? Border.all(
-                            color: Theme.of(context).colorScheme.primary,
-                            width: 1,
-                          )
-                        : null,
                   ),
                   child: Column(
                     children: [
-                      const SizedBox(height: 4),
-                      Text(
-                        '$dayIndex',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: isToday || isSelected
-                              ? FontWeight.bold
-                              : null,
+                      const SizedBox(height: AppSpacing.xs),
+                      Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: isToday
+                              ? Theme.of(context).colorScheme.primary
+                              : Colors.transparent,
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '$dayIndex',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                fontWeight: isToday || isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                                color: isToday
+                                    ? Theme.of(context).colorScheme.onPrimary
+                                    : isSelected
+                                    ? Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer
+                                    : null,
+                              ),
                         ),
                       ),
                       if (count > 0) ...[
-                        const SizedBox(height: 4),
+                        const SizedBox(height: AppSpacing.xs),
                         Wrap(
                           spacing: 2,
                           children: colors.take(3).map((c) {

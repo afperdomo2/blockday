@@ -13,8 +13,10 @@ class DaysHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
+    final cs = Theme.of(context).colorScheme;
+    final ts = Theme.of(context).textTheme;
     return Container(
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      color: cs.surfaceContainerLow,
       child: Row(
         children: [
           const SizedBox(width: 48),
@@ -22,12 +24,10 @@ class DaysHeader extends StatelessWidget {
             final isToday = isSameDay(d, now);
             return Expanded(
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 6),
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                 decoration: BoxDecoration(
-                  color: isToday
-                      ? Theme.of(context).colorScheme.primaryContainer
-                      : null,
-                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  color: isToday ? cs.primary : null,
+                  borderRadius: AppRadius.mdAll,
                 ),
                 margin: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.xxs,
@@ -37,19 +37,18 @@ class DaysHeader extends StatelessWidget {
                   children: [
                     Text(
                       DateFormat('E', 'es').format(d),
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      style: ts.labelSmall?.copyWith(
                         color: isToday
-                            ? Theme.of(context).colorScheme.onPrimaryContainer
-                            : null,
+                            ? cs.onPrimary.withValues(alpha: 0.85)
+                            : cs.onSurfaceVariant,
+                        fontWeight: isToday ? FontWeight.w600 : null,
                       ),
                     ),
                     Text(
                       '${d.day}',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: isToday ? FontWeight.bold : null,
-                        color: isToday
-                            ? Theme.of(context).colorScheme.onPrimaryContainer
-                            : null,
+                      style: ts.titleSmall?.copyWith(
+                        fontWeight: isToday ? FontWeight.w700 : FontWeight.w500,
+                        color: isToday ? cs.onPrimary : cs.onSurface,
                       ),
                     ),
                   ],
