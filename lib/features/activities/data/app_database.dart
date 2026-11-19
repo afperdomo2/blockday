@@ -13,6 +13,7 @@ class Tasks extends Table {
   TextColumn get notes => text().nullable()();
   TextColumn get kind => text()();
   IntColumn get estimatedMinutes => integer().nullable()();
+  TextColumn get tags => text().nullable()();
   IntColumn get createdAt => integer()();
   IntColumn get completedAt => integer().nullable()();
 
@@ -71,7 +72,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -90,6 +91,9 @@ class AppDatabase extends _$AppDatabase {
         try {
           await customStatement('ALTER TABLE tasks DROP COLUMN status');
         } catch (_) {}
+      }
+      if (from < 4) {
+        await m.addColumn(tasks, tasks.tags);
       }
     },
     beforeOpen: (details) async {

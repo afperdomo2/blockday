@@ -20,9 +20,11 @@ class Task {
     this.notes,
     this.kind = TaskKind.task,
     this.estimatedMinutes,
+    List<String> tags = const [],
     DateTime? createdAt,
     this.completedAt,
-  }) : createdAt = createdAt ?? DateTime.now() {
+  }) : tags = List.unmodifiable(normalizeTags(tags)),
+       createdAt = createdAt ?? DateTime.now() {
     if (title.trim().isEmpty) {
       throw ArgumentError.value(title, 'title', 'No puede estar vacío');
     }
@@ -35,11 +37,24 @@ class Task {
     }
   }
 
+  static List<String> normalizeTags(Iterable<String> tags) {
+    final seen = <String>{};
+    final result = <String>[];
+    for (final tag in tags) {
+      final t = tag.trim();
+      if (t.isEmpty) continue;
+      final key = t.toLowerCase();
+      if (seen.add(key)) result.add(t);
+    }
+    return result;
+  }
+
   final String id;
   final String title;
   final String? notes;
   final TaskKind kind;
   final int? estimatedMinutes;
+  final List<String> tags;
   final DateTime createdAt;
   final DateTime? completedAt;
 
@@ -51,6 +66,7 @@ class Task {
     String? notes,
     TaskKind? kind,
     int? estimatedMinutes,
+    List<String>? tags,
     DateTime? createdAt,
     DateTime? completedAt,
     bool clearNotes = false,
@@ -65,9 +81,15 @@ class Task {
       estimatedMinutes: clearEstimatedMinutes
           ? null
           : (estimatedMinutes ?? this.estimatedMinutes),
+      tags: tags ?? this.tags,
       createdAt: createdAt ?? this.createdAt,
       completedAt: clearCompletedAt ? null : (completedAt ?? this.completedAt),
     );
+  }
+
+  bool hasTag(String tag) {
+    final key = tag.trim().toLowerCase();
+    return tags.any((t) => t.toLowerCase() == key);
   }
 
   @override
@@ -78,6 +100,7 @@ class Task {
       notes == other.notes &&
       kind == other.kind &&
       estimatedMinutes == other.estimatedMinutes &&
+      _listEquals(tags, other.tags) &&
       createdAt.millisecondsSinceEpoch ==
           other.createdAt.millisecondsSinceEpoch &&
       completedAt?.millisecondsSinceEpoch ==
@@ -90,10 +113,20 @@ class Task {
     notes,
     kind,
     estimatedMinutes,
+    Object.hashAll(tags),
     createdAt.millisecondsSinceEpoch,
     completedAt?.millisecondsSinceEpoch,
   );
 
   @override
-  String toString() => 'Task($id, $title, $kind, completed:$isCompleted)';
+  String toString() =>
+      'Task($id, $title, $kind, tags:$tags, completed:$isCompleted)';
+}
+
+bool _listEquals(List<String> a, List<String> b) {
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
 }

@@ -23,6 +23,7 @@ class _BacklogScreenState extends ConsumerState<BacklogScreen> {
   String _searchQuery = '';
   bool _searching = false;
   String _statusFilter = 'all';
+  String? _tagFilter;
 
   @override
   void dispose() {
@@ -111,6 +112,7 @@ class _BacklogScreenState extends ConsumerState<BacklogScreen> {
             return Column(
               children: [
                 _buildStatusFilter(context),
+                _buildTagFilter(tasks),
                 Expanded(
                   child: filtered.isEmpty
                       ? Center(
@@ -244,6 +246,33 @@ class _BacklogScreenState extends ConsumerState<BacklogScreen> {
     );
   }
 
+  Widget _buildTagFilter(List<Task> tasks) {
+    final tags = <String>{};
+    for (final t in tasks) {
+      tags.addAll(t.tags);
+    }
+    if (tags.isEmpty) return const SizedBox.shrink();
+    final sorted = tags.toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      child: Row(
+        children: sorted.map((tag) {
+          final selected = _tagFilter == tag;
+          return Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.sm),
+            child: FilterChip(
+              label: Text('#$tag'),
+              selected: selected,
+              onSelected: (v) => setState(() => _tagFilter = v ? tag : null),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   List<Task> _applyFilter(List<Task> tasks) {
     var result = tasks;
 
@@ -253,9 +282,14 @@ class _BacklogScreenState extends ConsumerState<BacklogScreen> {
           .where(
             (t) =>
                 t.title.toLowerCase().contains(q) ||
-                (t.notes?.toLowerCase().contains(q) ?? false),
+                (t.notes?.toLowerCase().contains(q) ?? false) ||
+                t.tags.any((tag) => tag.toLowerCase().contains(q)),
           )
           .toList();
+    }
+
+    if (_tagFilter != null) {
+      result = result.where((t) => t.hasTag(_tagFilter!)).toList();
     }
 
     switch (_statusFilter) {

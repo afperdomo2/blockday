@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 
 import '../../domain/task.dart' as domain;
@@ -10,6 +12,7 @@ db.TasksCompanion toTaskCompanion(domain.Task task) {
     notes: Value(task.notes),
     kind: Value(task.kind.name),
     estimatedMinutes: Value(task.estimatedMinutes),
+    tags: Value(task.tags.isEmpty ? null : jsonEncode(task.tags)),
     createdAt: Value(task.createdAt.millisecondsSinceEpoch),
     completedAt: Value(task.completedAt?.millisecondsSinceEpoch),
   );
@@ -22,9 +25,21 @@ domain.Task taskFromRow(db.Task row) {
     notes: row.notes,
     kind: domain.TaskKind.values.byName(row.kind),
     estimatedMinutes: row.estimatedMinutes,
+    tags: _decodeTags(row.tags),
     createdAt: DateTime.fromMillisecondsSinceEpoch(row.createdAt),
     completedAt: row.completedAt == null
         ? null
         : DateTime.fromMillisecondsSinceEpoch(row.completedAt!),
   );
+}
+
+List<String> _decodeTags(String? raw) {
+  if (raw == null || raw.isEmpty) return const [];
+  try {
+    final decoded = jsonDecode(raw);
+    if (decoded is List) {
+      return decoded.whereType<String>().toList();
+    }
+  } catch (_) {}
+  return const [];
 }

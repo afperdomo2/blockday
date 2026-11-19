@@ -55,6 +55,15 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _tagsMeta = const VerificationMeta('tags');
+  @override
+  late final GeneratedColumn<String> tags = GeneratedColumn<String>(
+    'tags',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -84,6 +93,7 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     notes,
     kind,
     estimatedMinutes,
+    tags,
     createdAt,
     completedAt,
   ];
@@ -135,6 +145,12 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
         ),
       );
     }
+    if (data.containsKey('tags')) {
+      context.handle(
+        _tagsMeta,
+        tags.isAcceptableOrUnknown(data['tags']!, _tagsMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -181,6 +197,10 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
         DriftSqlType.int,
         data['${effectivePrefix}estimated_minutes'],
       ),
+      tags: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tags'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}created_at'],
@@ -204,6 +224,7 @@ class Task extends DataClass implements Insertable<Task> {
   final String? notes;
   final String kind;
   final int? estimatedMinutes;
+  final String? tags;
   final int createdAt;
   final int? completedAt;
   const Task({
@@ -212,6 +233,7 @@ class Task extends DataClass implements Insertable<Task> {
     this.notes,
     required this.kind,
     this.estimatedMinutes,
+    this.tags,
     required this.createdAt,
     this.completedAt,
   });
@@ -226,6 +248,9 @@ class Task extends DataClass implements Insertable<Task> {
     map['kind'] = Variable<String>(kind);
     if (!nullToAbsent || estimatedMinutes != null) {
       map['estimated_minutes'] = Variable<int>(estimatedMinutes);
+    }
+    if (!nullToAbsent || tags != null) {
+      map['tags'] = Variable<String>(tags);
     }
     map['created_at'] = Variable<int>(createdAt);
     if (!nullToAbsent || completedAt != null) {
@@ -245,6 +270,7 @@ class Task extends DataClass implements Insertable<Task> {
       estimatedMinutes: estimatedMinutes == null && nullToAbsent
           ? const Value.absent()
           : Value(estimatedMinutes),
+      tags: tags == null && nullToAbsent ? const Value.absent() : Value(tags),
       createdAt: Value(createdAt),
       completedAt: completedAt == null && nullToAbsent
           ? const Value.absent()
@@ -263,6 +289,7 @@ class Task extends DataClass implements Insertable<Task> {
       notes: serializer.fromJson<String?>(json['notes']),
       kind: serializer.fromJson<String>(json['kind']),
       estimatedMinutes: serializer.fromJson<int?>(json['estimatedMinutes']),
+      tags: serializer.fromJson<String?>(json['tags']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
       completedAt: serializer.fromJson<int?>(json['completedAt']),
     );
@@ -276,6 +303,7 @@ class Task extends DataClass implements Insertable<Task> {
       'notes': serializer.toJson<String?>(notes),
       'kind': serializer.toJson<String>(kind),
       'estimatedMinutes': serializer.toJson<int?>(estimatedMinutes),
+      'tags': serializer.toJson<String?>(tags),
       'createdAt': serializer.toJson<int>(createdAt),
       'completedAt': serializer.toJson<int?>(completedAt),
     };
@@ -287,6 +315,7 @@ class Task extends DataClass implements Insertable<Task> {
     Value<String?> notes = const Value.absent(),
     String? kind,
     Value<int?> estimatedMinutes = const Value.absent(),
+    Value<String?> tags = const Value.absent(),
     int? createdAt,
     Value<int?> completedAt = const Value.absent(),
   }) => Task(
@@ -297,6 +326,7 @@ class Task extends DataClass implements Insertable<Task> {
     estimatedMinutes: estimatedMinutes.present
         ? estimatedMinutes.value
         : this.estimatedMinutes,
+    tags: tags.present ? tags.value : this.tags,
     createdAt: createdAt ?? this.createdAt,
     completedAt: completedAt.present ? completedAt.value : this.completedAt,
   );
@@ -309,6 +339,7 @@ class Task extends DataClass implements Insertable<Task> {
       estimatedMinutes: data.estimatedMinutes.present
           ? data.estimatedMinutes.value
           : this.estimatedMinutes,
+      tags: data.tags.present ? data.tags.value : this.tags,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       completedAt: data.completedAt.present
           ? data.completedAt.value
@@ -324,6 +355,7 @@ class Task extends DataClass implements Insertable<Task> {
           ..write('notes: $notes, ')
           ..write('kind: $kind, ')
           ..write('estimatedMinutes: $estimatedMinutes, ')
+          ..write('tags: $tags, ')
           ..write('createdAt: $createdAt, ')
           ..write('completedAt: $completedAt')
           ..write(')'))
@@ -337,6 +369,7 @@ class Task extends DataClass implements Insertable<Task> {
     notes,
     kind,
     estimatedMinutes,
+    tags,
     createdAt,
     completedAt,
   );
@@ -349,6 +382,7 @@ class Task extends DataClass implements Insertable<Task> {
           other.notes == this.notes &&
           other.kind == this.kind &&
           other.estimatedMinutes == this.estimatedMinutes &&
+          other.tags == this.tags &&
           other.createdAt == this.createdAt &&
           other.completedAt == this.completedAt);
 }
@@ -359,6 +393,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
   final Value<String?> notes;
   final Value<String> kind;
   final Value<int?> estimatedMinutes;
+  final Value<String?> tags;
   final Value<int> createdAt;
   final Value<int?> completedAt;
   final Value<int> rowid;
@@ -368,6 +403,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
     this.notes = const Value.absent(),
     this.kind = const Value.absent(),
     this.estimatedMinutes = const Value.absent(),
+    this.tags = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.completedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -378,6 +414,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
     this.notes = const Value.absent(),
     required String kind,
     this.estimatedMinutes = const Value.absent(),
+    this.tags = const Value.absent(),
     required int createdAt,
     this.completedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -391,6 +428,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
     Expression<String>? notes,
     Expression<String>? kind,
     Expression<int>? estimatedMinutes,
+    Expression<String>? tags,
     Expression<int>? createdAt,
     Expression<int>? completedAt,
     Expression<int>? rowid,
@@ -401,6 +439,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
       if (notes != null) 'notes': notes,
       if (kind != null) 'kind': kind,
       if (estimatedMinutes != null) 'estimated_minutes': estimatedMinutes,
+      if (tags != null) 'tags': tags,
       if (createdAt != null) 'created_at': createdAt,
       if (completedAt != null) 'completed_at': completedAt,
       if (rowid != null) 'rowid': rowid,
@@ -413,6 +452,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
     Value<String?>? notes,
     Value<String>? kind,
     Value<int?>? estimatedMinutes,
+    Value<String?>? tags,
     Value<int>? createdAt,
     Value<int?>? completedAt,
     Value<int>? rowid,
@@ -423,6 +463,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
       notes: notes ?? this.notes,
       kind: kind ?? this.kind,
       estimatedMinutes: estimatedMinutes ?? this.estimatedMinutes,
+      tags: tags ?? this.tags,
       createdAt: createdAt ?? this.createdAt,
       completedAt: completedAt ?? this.completedAt,
       rowid: rowid ?? this.rowid,
@@ -447,6 +488,9 @@ class TasksCompanion extends UpdateCompanion<Task> {
     if (estimatedMinutes.present) {
       map['estimated_minutes'] = Variable<int>(estimatedMinutes.value);
     }
+    if (tags.present) {
+      map['tags'] = Variable<String>(tags.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<int>(createdAt.value);
     }
@@ -467,6 +511,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
           ..write('notes: $notes, ')
           ..write('kind: $kind, ')
           ..write('estimatedMinutes: $estimatedMinutes, ')
+          ..write('tags: $tags, ')
           ..write('createdAt: $createdAt, ')
           ..write('completedAt: $completedAt, ')
           ..write('rowid: $rowid')
@@ -1905,6 +1950,7 @@ typedef $$TasksTableCreateCompanionBuilder = TasksCompanion Function({
   Value<String?> notes,
   required String kind,
   Value<int?> estimatedMinutes,
+  Value<String?> tags,
   required int createdAt,
   Value<int?> completedAt,
   Value<int> rowid,
@@ -1915,6 +1961,7 @@ typedef $$TasksTableUpdateCompanionBuilder = TasksCompanion Function({
   Value<String?> notes,
   Value<String> kind,
   Value<int?> estimatedMinutes,
+  Value<String?> tags,
   Value<int> createdAt,
   Value<int?> completedAt,
   Value<int> rowid,
@@ -1973,6 +2020,11 @@ class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
 
   ColumnFilters<int> get estimatedMinutes => $composableBuilder(
     column: $table.estimatedMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tags => $composableBuilder(
+    column: $table.tags,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2046,6 +2098,11 @@ class $$TasksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get tags => $composableBuilder(
+    column: $table.tags,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -2082,6 +2139,9 @@ class $$TasksTableAnnotationComposer
     column: $table.estimatedMinutes,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get tags =>
+      $composableBuilder(column: $table.tags, builder: (column) => column);
 
   GeneratedColumn<int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -2150,6 +2210,7 @@ class $$TasksTableTableManager
                 Value<String?> notes = const Value.absent(),
                 Value<String> kind = const Value.absent(),
                 Value<int?> estimatedMinutes = const Value.absent(),
+                Value<String?> tags = const Value.absent(),
                 Value<int> createdAt = const Value.absent(),
                 Value<int?> completedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -2159,6 +2220,7 @@ class $$TasksTableTableManager
                 notes: notes,
                 kind: kind,
                 estimatedMinutes: estimatedMinutes,
+                tags: tags,
                 createdAt: createdAt,
                 completedAt: completedAt,
                 rowid: rowid,
@@ -2170,6 +2232,7 @@ class $$TasksTableTableManager
                 Value<String?> notes = const Value.absent(),
                 required String kind,
                 Value<int?> estimatedMinutes = const Value.absent(),
+                Value<String?> tags = const Value.absent(),
                 required int createdAt,
                 Value<int?> completedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -2179,6 +2242,7 @@ class $$TasksTableTableManager
                 notes: notes,
                 kind: kind,
                 estimatedMinutes: estimatedMinutes,
+                tags: tags,
                 createdAt: createdAt,
                 completedAt: completedAt,
                 rowid: rowid,

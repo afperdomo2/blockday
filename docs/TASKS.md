@@ -104,9 +104,17 @@ en verde (ver AGENTS.md).
 - [x] Resumen semanal en Backlog (`Total: X/Y sesiones`)
 - [x] Empty states y filtros en Backlog
 - [x] Corrección de `time_grid_test.dart` para `ProviderScope` + `sessionsStreamProvider`
-- [ ] Tags de tareas (deferido)
+- [x] Tags de tareas
 - [ ] Markdown en notas (campo `notes` ya preparado, render deferido)
 - [ ] Animaciones avanzadas según `apple-design` para Backlog (staggered list)
+
+Notas de implementación (tags):
+- Schema 3→4: columna `tasks.tags` (lista JSON serializada, nullable).
+- Dominio: `Task.tags` (lista inmutable) + `normalizeTags()` (trim, descarta
+  vacíos, dedupe case-insensitive conservando la primera forma) + `hasTag()`.
+- UI: chips `InputChip` en `TaskEditorScreen` (añadir con Enter o botón +),
+  chips `#tag` en `TaskTile`, fila de filtros por etiqueta en `BacklogScreen`
+  (selección única, toggle) y la búsqueda del backlog también matchea tags.
 
 ## Hito 15 — Fix de navegación post-editor
 

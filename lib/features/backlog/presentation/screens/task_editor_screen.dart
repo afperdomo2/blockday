@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/responsive/constrained_content.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
 import '../../domain/task.dart';
 import '../../providers/tasks_providers.dart';
@@ -25,7 +26,9 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
   final _titleCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
   final _estimatedCtrl = TextEditingController();
+  final _tagCtrl = TextEditingController();
   TaskKind _kind = TaskKind.task;
+  List<String> _tags = const [];
   DateTime? _completedAt;
   bool _loaded = false;
   bool _saving = false;
@@ -35,6 +38,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     _titleCtrl.dispose();
     _notesCtrl.dispose();
     _estimatedCtrl.dispose();
+    _tagCtrl.dispose();
     super.dispose();
   }
 
@@ -42,10 +46,17 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     _titleCtrl.text = t.title;
     _notesCtrl.text = t.notes ?? '';
     _kind = t.kind;
+    _tags = List.of(t.tags);
     _completedAt = t.completedAt;
     _estimatedCtrl.text = t.estimatedMinutes == null
         ? ''
         : (t.estimatedMinutes! / 60).toStringAsFixed(1);
+  }
+
+  void _addTag() {
+    final normalized = Task.normalizeTags([..._tags, _tagCtrl.text]);
+    _tagCtrl.clear();
+    setState(() => _tags = normalized);
   }
 
   Future<void> _save() async {
@@ -74,6 +85,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
       notes: notes,
       kind: _kind,
       estimatedMinutes: estimated,
+      tags: _tags,
       createdAt: existing?.createdAt ?? DateTime.now(),
       completedAt: _completedAt,
     );
@@ -358,6 +370,42 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                   if (h == null || h <= 0) return 'Debe ser > 0';
                   return null;
                 },
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text('Etiquetas', style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: AppSpacing.sm),
+              if (_tags.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.xs,
+                    children: _tags
+                        .map(
+                          (tag) => InputChip(
+                            label: Text(tag),
+                            onDeleted: () => setState(
+                              () =>
+                                  _tags = _tags.where((t) => t != tag).toList(),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+              TextField(
+                controller: _tagCtrl,
+                decoration: InputDecoration(
+                  labelText: 'Añadir etiqueta',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.add),
+                    tooltip: 'Añadir etiqueta',
+                    onPressed: _addTag,
+                  ),
+                ),
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _addTag(),
               ),
               if (widget.taskId != null) ...[
                 const SizedBox(height: 24),

@@ -126,6 +126,36 @@ class TaskTile extends ConsumerWidget {
                         ),
                       ),
                     ],
+                    if (task.tags.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Wrap(
+                        spacing: AppSpacing.xs,
+                        runSpacing: AppSpacing.xxs,
+                        children: task.tags
+                            .map(
+                              (tag) => Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.sm,
+                                  vertical: AppSpacing.xxs,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: cs.surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(
+                                    AppRadius.pill,
+                                  ),
+                                  border: Border.all(color: cs.outlineVariant),
+                                ),
+                                child: Text(
+                                  '#$tag',
+                                  style: ts.labelSmall?.copyWith(
+                                    color: cs.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ],
                     if (progress.linkedActivitiesCount > 0 &&
                         progress.totalPlannedSessions > 0) ...[
                       const SizedBox(height: AppSpacing.sm),
