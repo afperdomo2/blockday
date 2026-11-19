@@ -272,9 +272,25 @@ Notas de implementación:
 
 ## Hito 22 — Backup export/import JSON
 
-- [ ] Serializar tasks, activities, exclusions y sessions a JSON
-- [ ] Exportar a archivo (file picker/sharing) + importar con validación
-- [ ] Tests round-trip export→import sin pérdida de datos
+- [x] Serializar tasks, activities, exclusions y sessions a JSON
+- [x] Exportar a archivo (file picker/sharing) + importar con validación
+- [x] Tests round-trip export→import sin pérdida de datos
+
+Notas de implementación:
+- Formato JSON versionado (`app: "blockday"`, `version: 1`) con tasks (incluye
+  tags), activities (incluye regla, exclusiones y recordatorio) y sessions.
+  Fechas en epoch ms. Todo el codec es puro en
+  `lib/features/backup/domain/backup_document.dart`
+  (`encodeBackup`/`decodeBackup` + `BackupFormatException`).
+- Validación de referencias al decodificar (taskIds/activityIds existentes);
+  importar un archivo inválido no toca los datos (validación antes de la
+  transacción).
+- `BackupRepository` sobre Drift: `exportJson()` e `importReplaceAll()`
+  (estrategia: **reemplazo total** dentro de una transacción).
+- Archivos con `file_picker` (`saveFile` con diálogo nativo en Windows/Linux/
+  Android SAF; `pickFiles` para importar). Sin dependencias extra.
+- UI: sección «Datos» en Ajustes (exportar/importar) con diálogo de
+  confirmación al importar. Tras importar se reprograman los recordatorios.
 
 ## Hito 23 — Notificaciones/recordatorios
 

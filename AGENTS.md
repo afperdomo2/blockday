@@ -24,6 +24,8 @@ Roadmap de trabajo: `docs/TASKS.md`
   implementación en memoria para tests).
 - Notificaciones: **flutter_local_notifications** + `timezone`/`flutter_timezone`
   (recordatorios; interfaz `NotificationService` con fake para tests).
+- Backup: **file_picker** (export/import JSON de todas las tablas; codec puro
+  en `features/backup/domain/`, repositorio con reemplazo total).
 - Navegación: **go_router**.
 - Fechas/formato: **intl** (locale `es`).
 - UI en **español** (strings hardcodeados, sin i18n por ahora).

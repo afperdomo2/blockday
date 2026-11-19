@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/responsive/constrained_content.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/section_header.dart';
+import '../../../backup/presentation/widgets/backup_section.dart';
 import '../../domain/app_settings.dart';
 import '../../providers/settings_providers.dart';
 
@@ -91,6 +92,8 @@ class SettingsScreen extends ConsumerWidget {
                       .setUse24HourFormat(v.first),
                 ),
               ),
+              const SizedBox(height: AppSpacing.xl),
+              const BackupSection(),
             ],
           ),
         ),

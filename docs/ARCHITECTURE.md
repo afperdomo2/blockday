@@ -10,6 +10,7 @@
 | Persistencia | `drift` (SQLite) | SQL real, queries por rango de fechas, DB en memoria para tests |
 | Preferencias | `shared_preferences` | Prefs ligeras (tema, inicio de semana, 12/24h), sin migración |
 | Notificaciones | `flutter_local_notifications` + `timezone` | Recordatorios locales en Android, Linux y Windows |
+| Archivos | `file_picker` | Export/import de copias de seguridad JSON |
 | Navegación | `go_router` | Rutas declarativas, deep-linking futuro |
 | Fechas | `intl` (locale `es`) | Formato en español |
 | Modelos | Dart inmutables a mano | Sin freezed/json_serializable (menos codegen) |
@@ -39,6 +40,11 @@ lib/
 │   │   ├── data/       # mappers, TasksRepository, SessionsRepository
 │   │   ├── presentation/  # BacklogScreen, TaskEditor, TaskTile
 │   │   └── providers/  # tasks/sessions/progress providers
+│   ├── backup/
+│   │   ├── domain/     # codec JSON (encode/decode + validación, puro)
+│   │   ├── data/       # BackupRepository (Drift) + BackupFileService
+│   │   ├── presentation/  # sección «Datos» de Ajustes
+│   │   └── providers/
 │   ├── home/
 │   │   ├── presentation/  # dashboard Inicio
 │   │   └── providers/     # resumen semanal
