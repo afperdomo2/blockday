@@ -249,3 +249,54 @@ Token files:
 Rules: use tokens only, `const` where possible, respect `MediaQuery.disableAnimations`,
 keep touch targets ≥48dp, and run the `flutter`/`ui-ux-pro-max` pre-delivery checklist
 before committing UI changes.
+
+---
+
+## Responsive y adaptativo (Blockday)
+
+La app es **mobile-first**: el layout cómodo es el de teléfono y en pantallas
+grandes se adapta, nunca se estira. La lógica vive en `lib/core/responsive/`.
+
+### Window size classes
+
+| Clase | Ancho | Casos típicos | Navegación |
+|---|---|---|---|
+| `compact` | `< 600` | teléfono, ventana de escritorio angosta | `NavigationBar` inferior |
+| `medium` | `600 – 1023` | tablet vertical, ventana mediana | `NavigationRail` (sin etiquetas) |
+| `expanded` | `≥ 1024` | tablet horizontal, escritorio | `NavigationRail` (con etiquetas) |
+
+```dart
+if (context.isCompact) { /* layout de teléfono */ }
+switch (context.windowSize) { ... }
+```
+
+> Los cortes viven en `AppBreakpoints.medium` (600) y `AppBreakpoints.expanded`
+> (1024). **No usar números mágicos** (`maxWidth >= 600`) en pantallas.
+
+### Ancho máximo de contenido
+
+En lugar de estirar el contenido, se centra con `ConstrainedContent`:
+
+```dart
+body: ConstrainedContent(
+  maxWidth: AppContentWidth.list,
+  child: ListView(...),
+),
+```
+
+| Token | Ancho | Uso |
+|---|---|---|
+| `AppContentWidth.form` | 560 | editores (actividad, tarea) |
+| `AppContentWidth.day` | 560 | calendario, vista día |
+| `AppContentWidth.list` | 720 | Inicio, Backlog, barra de herramientas del calendario |
+| `AppContentWidth.threeDay` | 760 | calendario, vista 3 días |
+| `AppContentWidth.calendar` | 1100 | calendario, semana y mes |
+
+### Escritorio (Linux / Windows)
+
+- La ventana de Linux abre en **480×900** (proporción de teléfono), así el
+  primer vistazo es el layout móvil.
+- Al **redimensionar** la ventana el layout cambia en vivo: al pasar de 600 px
+  aparece el rail lateral y, desde 1024 px, sus etiquetas; el contenido se
+  centra y deja de estirarse.
+- No duplicar pantallas por plataforma: adaptar con breakpoints y tokens.

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/responsive/constrained_content.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/section_header.dart';
 import '../../domain/task.dart';
@@ -78,71 +79,74 @@ class _BacklogScreenState extends ConsumerState<BacklogScreen> {
             ),
         ],
       ),
-      body: tasksAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
-        data: (tasks) {
-          if (tasks.isEmpty) {
-            return Column(
-              children: [
-                _buildStatusFilter(context),
-                const Expanded(
-                  child: Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(AppSpacing.xxl),
-                      child: Text(
-                        'Sin tareas aún.\nCrea una con el botón + y luego prográmala en el calendario.',
-                        textAlign: TextAlign.center,
+      body: ConstrainedContent(
+        maxWidth: AppContentWidth.list,
+        child: tasksAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(child: Text('Error: $e')),
+          data: (tasks) {
+            if (tasks.isEmpty) {
+              return Column(
+                children: [
+                  _buildStatusFilter(context),
+                  const Expanded(
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(AppSpacing.xxl),
+                        child: Text(
+                          'Sin tareas aún.\nCrea una con el botón + y luego prográmala en el calendario.',
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
                   ),
+                ],
+              );
+            }
+
+            final filtered = _applyFilter(tasks);
+
+            return Column(
+              children: [
+                _buildStatusFilter(context),
+                Expanded(
+                  child: filtered.isEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(AppSpacing.xxl),
+                            child: Text(
+                              _searchQuery.isEmpty
+                                  ? 'Sin tareas'
+                                  : 'Sin resultados para "$_searchQuery"',
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                            ),
+                          ),
+                        )
+                      : ListView(
+                          padding: const EdgeInsets.only(bottom: 80),
+                          children: [
+                            if (_statusFilter == 'all' && _searchQuery.isEmpty)
+                              ..._buildAllSections(filtered)
+                            else
+                              _Section(
+                                title: _sectionTitleForFilter(),
+                                count: filtered.length,
+                                tasks: filtered,
+                                emptyText: 'Sin tareas',
+                              ),
+                          ],
+                        ),
                 ),
               ],
             );
-          }
-
-          final filtered = _applyFilter(tasks);
-
-          return Column(
-            children: [
-              _buildStatusFilter(context),
-              Expanded(
-                child: filtered.isEmpty
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppSpacing.xxl),
-                          child: Text(
-                            _searchQuery.isEmpty
-                                ? 'Sin tareas'
-                                : 'Sin resultados para "$_searchQuery"',
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
-                          ),
-                        ),
-                      )
-                    : ListView(
-                        padding: const EdgeInsets.only(bottom: 80),
-                        children: [
-                          if (_statusFilter == 'all' && _searchQuery.isEmpty)
-                            ..._buildAllSections(filtered)
-                          else
-                            _Section(
-                              title: _sectionTitleForFilter(),
-                              count: filtered.length,
-                              tasks: filtered,
-                              emptyText: 'Sin tareas',
-                            ),
-                        ],
-                      ),
-              ),
-            ],
-          );
-        },
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'backlog-fab',

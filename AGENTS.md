@@ -101,6 +101,12 @@ lo resuelven solos desde `~/Documentos/flutter`, `~/flutter`, snap, `/opt` o
   cualquier pantalla/componente. Nada de hex/spacing/radius/fontSize crudos en
   widgets; respetar `MediaQuery.disableAnimations` (reduced motion) y targets
   táctiles >= 48dp.
+- **Responsive (mobile-first)**: el layout cómodo es el de teléfono; en pantallas
+  grandes se adapta, no se estira. Usar `context.windowSize` / `context.isCompact`
+  (`lib/core/responsive/app_breakpoints.dart`) y acotar el contenido con
+  `ConstrainedContent` + `AppContentWidth` (`lib/core/responsive/constrained_content.dart`).
+  Nunca comparar anchos con números mágicos (`maxWidth >= 600`).
+  Ver `docs/DESIGN_SYSTEM.md` → «Responsive y adaptativo».
 
 ## Tests
 
@@ -155,6 +161,9 @@ No confiar en memoria: las APIs cambian.
 
 - Detalle completo (requisitos, rutas de instalación, firma, desinstalación) en
   `README.md` → «Compilación y distribución».
+- **Responsive**: `NavigationBar` en compact (`< 600`), `NavigationRail` en
+  tablet/escritorio; el contenido se centra con `ConstrainedContent`. La ventana
+  de Linux abre en 480×900 y se adapta al redimensionar (breakpoints 600 / 1024).
 - En Linux el `.deb` instala en `/opt/blockday/` + `/usr/bin/blockday`; la
   instalación local en `~/.local/opt/blockday/` + `~/.local/bin/blockday`.
 - El icono de Linux es `linux/blockday.png` y la entrada de menú

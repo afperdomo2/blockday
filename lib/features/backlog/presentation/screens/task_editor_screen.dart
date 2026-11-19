@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/responsive/constrained_content.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
@@ -239,125 +240,131 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
             TextButton(onPressed: _save, child: const Text('Guardar')),
         ],
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            TextFormField(
-              controller: _titleCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Título *',
-                border: OutlineInputBorder(),
+      body: ConstrainedContent(
+        maxWidth: AppContentWidth.form,
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              TextFormField(
+                controller: _titleCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Título *',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (v) => v == null || v.trim().isEmpty
+                    ? 'El título es obligatorio'
+                    : null,
               ),
-              validator: (v) => v == null || v.trim().isEmpty
-                  ? 'El título es obligatorio'
-                  : null,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _notesCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Notas',
-                border: OutlineInputBorder(),
-                hintText: 'Descripción, links, markdown futuro...',
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _notesCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Notas',
+                  border: OutlineInputBorder(),
+                  hintText: 'Descripción, links, markdown futuro...',
+                ),
+                maxLines: 4,
               ),
-              maxLines: 4,
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<TaskKind>(
-              initialValue: _kind,
-              decoration: const InputDecoration(
-                labelText: 'Tipo',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<TaskKind>(
+                initialValue: _kind,
+                decoration: const InputDecoration(
+                  labelText: 'Tipo',
+                  border: OutlineInputBorder(),
+                ),
+                items: TaskKind.values
+                    .map(
+                      (k) => DropdownMenuItem(
+                        value: k,
+                        child: Row(
+                          children: [
+                            Icon(kindIcon(k), size: 20),
+                            const SizedBox(width: 8),
+                            Text(kindLabel(k)),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (v) => setState(() => _kind = v ?? TaskKind.task),
               ),
-              items: TaskKind.values
-                  .map(
-                    (k) => DropdownMenuItem(
-                      value: k,
-                      child: Row(
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      isCompleted ? Icons.check_circle : Icons.hourglass_empty,
+                      size: 18,
+                      color: isCompleted
+                          ? AppColors.success
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(kindIcon(k), size: 20),
-                          const SizedBox(width: 8),
-                          Text(kindLabel(k)),
+                          Text(
+                            'Estado: ${statusLabel(derivedStatus)}',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          Text(
+                            isCompleted ? 'Marcada como hecha' : 'Cambia automáticamente al programar o completar sesiones',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                          ),
                         ],
                       ),
                     ),
-                  )
-                  .toList(),
-              onChanged: (v) => setState(() => _kind = v ?? TaskKind.task),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outlineVariant,
+                    const SizedBox(width: 8),
+                    FilledButton.tonal(
+                      onPressed: _toggleCompleted,
+                      child: Text(isCompleted ? 'Reabrir' : 'Marcar hecha'),
+                    ),
+                  ],
                 ),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    isCompleted ? Icons.check_circle : Icons.hourglass_empty,
-                    size: 18,
-                    color: isCompleted
-                        ? AppColors.success
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Estado: ${statusLabel(derivedStatus)}',
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                        Text(
-                          isCompleted ? 'Marcada como hecha' : 'Cambia automáticamente al programar o completar sesiones',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  FilledButton.tonal(
-                    onPressed: _toggleCompleted,
-                    child: Text(isCompleted ? 'Reabrir' : 'Marcar hecha'),
-                  ),
-                ],
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _estimatedCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Estimación (horas)',
+                  border: OutlineInputBorder(),
+                  hintText: 'ej. 10',
+                ),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) return null;
+                  final h = double.tryParse(v.trim().replaceAll(',', '.'));
+                  if (h == null || h <= 0) return 'Debe ser > 0';
+                  return null;
+                },
               ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _estimatedCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Estimación (horas)',
-                border: OutlineInputBorder(),
-                hintText: 'ej. 10',
-              ),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              validator: (v) {
-                if (v == null || v.trim().isEmpty) return null;
-                final h = double.tryParse(v.trim().replaceAll(',', '.'));
-                if (h == null || h <= 0) return 'Debe ser > 0';
-                return null;
-              },
-            ),
-            if (widget.taskId != null) ...[
-              const SizedBox(height: 24),
-              _LinkedActivitiesSection(taskId: widget.taskId!),
+              if (widget.taskId != null) ...[
+                const SizedBox(height: 24),
+                _LinkedActivitiesSection(taskId: widget.taskId!),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/responsive/app_breakpoints.dart';
+import '../../../../core/responsive/constrained_content.dart';
 import '../../../../core/theme/app_motion.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/date_format.dart';
 import '../../../activities/domain/occurrence.dart';
 import '../../../activities/providers/activities_stream_provider.dart';
@@ -74,73 +77,89 @@ class CalendarScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final wide = constraints.maxWidth >= 600;
-                return SegmentedButton<CalendarView>(
-                  showSelectedIcon: false,
-                  segments: [
-                    ButtonSegment(
-                      value: CalendarView.day,
-                      label: wide ? const Text('Día') : null,
-                      icon: const Icon(Icons.view_day),
-                    ),
-                    ButtonSegment(
-                      value: CalendarView.threeDay,
-                      label: wide ? const Text('3 días') : null,
-                      icon: const Icon(Icons.view_column),
-                    ),
-                    ButtonSegment(
-                      value: CalendarView.week,
-                      label: wide ? const Text('Semana') : null,
-                      icon: const Icon(Icons.view_week),
-                    ),
-                    ButtonSegment(
-                      value: CalendarView.month,
-                      label: wide ? const Text('Mes') : null,
-                      icon: const Icon(Icons.calendar_month),
-                    ),
-                  ],
-                  selected: {view},
-                  onSelectionChanged: (s) =>
-                      ref.read(calendarStateProvider.notifier).setView(s.first),
-                );
-              },
+          ConstrainedContent(
+            maxWidth: AppContentWidth.list,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: AppSpacing.xs,
+              ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final wide = !context.isCompact;
+                  return SegmentedButton<CalendarView>(
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(
+                        value: CalendarView.day,
+                        label: wide ? const Text('Día') : null,
+                        icon: const Icon(Icons.view_day),
+                      ),
+                      ButtonSegment(
+                        value: CalendarView.threeDay,
+                        label: wide ? const Text('3 días') : null,
+                        icon: const Icon(Icons.view_column),
+                      ),
+                      ButtonSegment(
+                        value: CalendarView.week,
+                        label: wide ? const Text('Semana') : null,
+                        icon: const Icon(Icons.view_week),
+                      ),
+                      ButtonSegment(
+                        value: CalendarView.month,
+                        label: wide ? const Text('Mes') : null,
+                        icon: const Icon(Icons.calendar_month),
+                      ),
+                    ],
+                    selected: {view},
+                    onSelectionChanged: (s) => ref
+                        .read(calendarStateProvider.notifier)
+                        .setView(s.first),
+                  );
+                },
+              ),
             ),
           ),
           Expanded(
-            child: AnimatedSwitcher(
-              duration: AppMotion.reduceMotion(context)
-                  ? Duration.zero
-                  : AppMotion.base,
-              switchInCurve: AppMotion.enter,
-              switchOutCurve: AppMotion.exit,
-              child: activitiesAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text('Error: $e')),
-                data: (_) {
-                  if (view == CalendarView.threeDay) {
-                    return ThreeDayView(
-                      key: ValueKey('threeDay-$selectedDate'),
-                      selectedDate: selectedDate,
-                    );
-                  }
-                  if (view == CalendarView.week) {
-                    return WeekView(
-                      key: ValueKey('week-$selectedDate'),
-                      selectedDate: selectedDate,
-                    );
-                  }
-                  if (view == CalendarView.month) {
-                    return MonthView(
-                      key: ValueKey('month-$selectedDate'),
-                      selectedDate: selectedDate,
-                    );
-                  }
-                  return _buildDayGrid(context, selectedDate, occurrences);
-                },
+            child: ConstrainedContent(
+              maxWidth: switch (view) {
+                CalendarView.day => AppContentWidth.day,
+                CalendarView.threeDay => AppContentWidth.threeDay,
+                CalendarView.week ||
+                CalendarView.month => AppContentWidth.calendar,
+              },
+              child: AnimatedSwitcher(
+                duration: AppMotion.reduceMotion(context)
+                    ? Duration.zero
+                    : AppMotion.base,
+                switchInCurve: AppMotion.enter,
+                switchOutCurve: AppMotion.exit,
+                child: activitiesAsync.when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => Center(child: Text('Error: $e')),
+                  data: (_) {
+                    if (view == CalendarView.threeDay) {
+                      return ThreeDayView(
+                        key: ValueKey('threeDay-$selectedDate'),
+                        selectedDate: selectedDate,
+                      );
+                    }
+                    if (view == CalendarView.week) {
+                      return WeekView(
+                        key: ValueKey('week-$selectedDate'),
+                        selectedDate: selectedDate,
+                      );
+                    }
+                    if (view == CalendarView.month) {
+                      return MonthView(
+                        key: ValueKey('month-$selectedDate'),
+                        selectedDate: selectedDate,
+                      );
+                    }
+                    return _buildDayGrid(context, selectedDate, occurrences);
+                  },
+                ),
               ),
             ),
           ),

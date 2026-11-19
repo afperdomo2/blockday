@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/theme/activity_colors.dart';
+import '../../../../core/responsive/constrained_content.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../backlog/providers/tasks_providers.dart';
 import '../../domain/activity.dart';
@@ -529,243 +530,255 @@ class _ActivityEditorScreenState extends ConsumerState<ActivityEditorScreen> {
               TextButton(onPressed: _save, child: const Text('Guardar')),
           ],
         ),
-        body: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            children: [
-              TextFormField(
-                controller: _titleCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Título *',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) => v == null || v.trim().isEmpty
-                    ? 'El título es obligatorio'
-                    : null,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextFormField(
-                controller: _notesCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Notas',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Text('Color', style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: AppSpacing.sm),
-              Wrap(
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                children: List.generate(ActivityColors.length, (i) {
-                  final selected = _color == i;
-                  final ac = ActivityColors.light[i];
-                  return Semantics(
-                    label: 'Color ${i + 1}',
-                    button: true,
-                    selected: selected,
-                    child: GestureDetector(
-                      onTap: () => setState(() => _color = i),
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: ac.background,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: selected
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.outlineVariant,
-                            width: selected ? 3 : 1,
-                          ),
-                        ),
-                        child: selected
-                            ? Icon(Icons.check, size: 20, color: ac.foreground)
-                            : null,
-                      ),
-                    ),
-                  );
-                }),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              _TaskLinkTile(
-                taskId: _taskId,
-                onPick: _pickTask,
-                onClear: () => setState(() => _taskId = null),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              SegmentedButton<_EditorMode>(
-                segments: const [
-                  ButtonSegment(
-                    value: _EditorMode.single,
-                    label: Text('Puntual'),
-                    icon: Icon(Icons.event),
+        body: ConstrainedContent(
+          maxWidth: AppContentWidth.form,
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              children: [
+                TextFormField(
+                  controller: _titleCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Título *',
+                    border: OutlineInputBorder(),
                   ),
-                  ButtonSegment(
-                    value: _EditorMode.recurring,
-                    label: Text('Recurrente'),
-                    icon: Icon(Icons.repeat),
+                  validator: (v) => v == null || v.trim().isEmpty
+                      ? 'El título es obligatorio'
+                      : null,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                TextFormField(
+                  controller: _notesCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Notas',
+                    border: OutlineInputBorder(),
                   ),
-                ],
-                selected: {_mode},
-                onSelectionChanged: (s) => setState(() => _mode = s.first),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              if (_mode == _EditorMode.single) ...[
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Fecha'),
-                  subtitle: Text(
-                    DateFormat('EEEE d MMMM y', 'es').format(_singleDate),
-                  ),
-                  trailing: const Icon(Icons.calendar_today),
-                  onTap: () => _pickDate(
-                    _singleDate,
-                    (d) => setState(() => _singleDate = d),
-                  ),
+                  maxLines: 3,
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Inicio'),
-                        subtitle: Text(_singleStart.format(context)),
-                        onTap: () => _pickTime(
-                          _singleStart,
-                          (t) => setState(() => _singleStart = t),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Fin'),
-                        subtitle: Text(_singleEnd.format(context)),
-                        onTap: () => _pickTime(
-                          _singleEnd,
-                          (t) => setState(() => _singleEnd = t),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ] else ...[
-                Row(
-                  children: [
-                    Expanded(
-                      child: ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Inicio'),
-                        subtitle: Text(_recStart.format(context)),
-                        onTap: () => _pickTime(
-                          _recStart,
-                          (t) => setState(() => _recStart = t),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Fin'),
-                        subtitle: Text(_recEnd.format(context)),
-                        onTap: () => _pickTime(
-                          _recEnd,
-                          (t) => setState(() => _recEnd = t),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'Días de la semana',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
+                const SizedBox(height: AppSpacing.lg),
+                Text('Color', style: Theme.of(context).textTheme.titleSmall),
                 const SizedBox(height: AppSpacing.sm),
                 Wrap(
                   spacing: AppSpacing.sm,
-                  children: _weekdayLabels.entries.map((e) {
-                    final selected = _weekdays.contains(e.key);
-                    return FilterChip(
-                      label: Text(e.value),
+                  runSpacing: AppSpacing.sm,
+                  children: List.generate(ActivityColors.length, (i) {
+                    final selected = _color == i;
+                    final ac = ActivityColors.light[i];
+                    return Semantics(
+                      label: 'Color ${i + 1}',
+                      button: true,
                       selected: selected,
-                      onSelected: (v) => setState(() {
-                        if (v) {
-                          _weekdays = {..._weekdays, e.key};
-                        } else {
-                          _weekdays = {..._weekdays}..remove(e.key);
-                        }
-                      }),
-                    );
-                  }).toList(),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Fecha de inicio'),
-                  subtitle: Text(
-                    DateFormat('EEEE d MMMM y', 'es').format(_firstDate),
-                  ),
-                  trailing: const Icon(Icons.calendar_today),
-                  onTap: () => _pickDate(
-                    _firstDate,
-                    (d) => setState(() => _firstDate = d),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text('Termina', style: Theme.of(context).textTheme.titleSmall),
-                RadioGroup<_EndCondition>(
-                  groupValue: _endCondition,
-                  onChanged: (v) => setState(() => _endCondition = v!),
-                  child: Column(
-                    children: [
-                      RadioListTile<_EndCondition>(
-                        title: const Text('Nunca'),
-                        value: _EndCondition.never,
-                      ),
-                      RadioListTile<_EndCondition>(
-                        title: const Text('Hasta fecha'),
-                        value: _EndCondition.until,
-                      ),
-                      if (_endCondition == _EndCondition.until)
-                        ListTile(
-                          title: Text(
-                            DateFormat(
-                              'EEEE d MMMM y',
-                              'es',
-                            ).format(_untilDate),
+                      child: GestureDetector(
+                        onTap: () => setState(() => _color = i),
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: ac.background,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: selected
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context)
+                                        .colorScheme
+                                        .outlineVariant,
+                              width: selected ? 3 : 1,
+                            ),
                           ),
-                          trailing: const Icon(Icons.calendar_today),
-                          onTap: () => _pickDate(
-                            _untilDate,
-                            (d) => setState(() => _untilDate = d),
+                          child: selected
+                              ? Icon(
+                                  Icons.check,
+                                  size: 20,
+                                  color: ac.foreground,
+                                )
+                              : null,
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                _TaskLinkTile(
+                  taskId: _taskId,
+                  onPick: _pickTask,
+                  onClear: () => setState(() => _taskId = null),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                SegmentedButton<_EditorMode>(
+                  segments: const [
+                    ButtonSegment(
+                      value: _EditorMode.single,
+                      label: Text('Puntual'),
+                      icon: Icon(Icons.event),
+                    ),
+                    ButtonSegment(
+                      value: _EditorMode.recurring,
+                      label: Text('Recurrente'),
+                      icon: Icon(Icons.repeat),
+                    ),
+                  ],
+                  selected: {_mode},
+                  onSelectionChanged: (s) => setState(() => _mode = s.first),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                if (_mode == _EditorMode.single) ...[
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Fecha'),
+                    subtitle: Text(
+                      DateFormat('EEEE d MMMM y', 'es').format(_singleDate),
+                    ),
+                    trailing: const Icon(Icons.calendar_today),
+                    onTap: () => _pickDate(
+                      _singleDate,
+                      (d) => setState(() => _singleDate = d),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Inicio'),
+                          subtitle: Text(_singleStart.format(context)),
+                          onTap: () => _pickTime(
+                            _singleStart,
+                            (t) => setState(() => _singleStart = t),
                           ),
                         ),
-                      RadioListTile<_EndCondition>(
-                        title: const Text('Después de N veces'),
-                        value: _EndCondition.count,
+                      ),
+                      Expanded(
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Fin'),
+                          subtitle: Text(_singleEnd.format(context)),
+                          onTap: () => _pickTime(
+                            _singleEnd,
+                            (t) => setState(() => _singleEnd = t),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ),
-                if (_endCondition == _EndCondition.count)
-                  TextFormField(
-                    controller: _countCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Número de veces',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (v) {
-                      final n = int.tryParse(v ?? '');
-                      if (n == null || n < 1) return 'Debe ser >= 1';
-                      return null;
-                    },
+                ] else ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Inicio'),
+                          subtitle: Text(_recStart.format(context)),
+                          onTap: () => _pickTime(
+                            _recStart,
+                            (t) => setState(() => _recStart = t),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Fin'),
+                          subtitle: Text(_recEnd.format(context)),
+                          onTap: () => _pickTime(
+                            _recEnd,
+                            (t) => setState(() => _recEnd = t),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    'Días de la semana',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    children: _weekdayLabels.entries.map((e) {
+                      final selected = _weekdays.contains(e.key);
+                      return FilterChip(
+                        label: Text(e.value),
+                        selected: selected,
+                        onSelected: (v) => setState(() {
+                          if (v) {
+                            _weekdays = {..._weekdays, e.key};
+                          } else {
+                            _weekdays = {..._weekdays}..remove(e.key);
+                          }
+                        }),
+                      );
+                    }).toList(),
+                  ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Fecha de inicio'),
+                    subtitle: Text(
+                      DateFormat('EEEE d MMMM y', 'es').format(_firstDate),
+                    ),
+                    trailing: const Icon(Icons.calendar_today),
+                    onTap: () => _pickDate(
+                      _firstDate,
+                      (d) => setState(() => _firstDate = d),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    'Termina',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  RadioGroup<_EndCondition>(
+                    groupValue: _endCondition,
+                    onChanged: (v) => setState(() => _endCondition = v!),
+                    child: Column(
+                      children: [
+                        RadioListTile<_EndCondition>(
+                          title: const Text('Nunca'),
+                          value: _EndCondition.never,
+                        ),
+                        RadioListTile<_EndCondition>(
+                          title: const Text('Hasta fecha'),
+                          value: _EndCondition.until,
+                        ),
+                        if (_endCondition == _EndCondition.until)
+                          ListTile(
+                            title: Text(
+                              DateFormat(
+                                'EEEE d MMMM y',
+                                'es',
+                              ).format(_untilDate),
+                            ),
+                            trailing: const Icon(Icons.calendar_today),
+                            onTap: () => _pickDate(
+                              _untilDate,
+                              (d) => setState(() => _untilDate = d),
+                            ),
+                          ),
+                        RadioListTile<_EndCondition>(
+                          title: const Text('Después de N veces'),
+                          value: _EndCondition.count,
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (_endCondition == _EndCondition.count)
+                    TextFormField(
+                      controller: _countCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Número de veces',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (v) {
+                        final n = int.tryParse(v ?? '');
+                        if (n == null || n < 1) return 'Debe ser >= 1';
+                        return null;
+                      },
+                    ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

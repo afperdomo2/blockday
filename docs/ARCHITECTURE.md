@@ -5,6 +5,7 @@
 | Área | Decisión | Motivo |
 |---|---|---|
 | UI | Flutter (Windows, Android y Linux) | Un solo código para los tres targets |
+| Layout | Adaptativo por *window size class* | Mobile-first, con rail y ancho acotado en tablet/escritorio |
 | Estado | `flutter_riverpod` | Testeable, sin `setState` global |
 | Persistencia | `drift` (SQLite) | SQL real, queries por rango de fechas, DB en memoria para tests |
 | Navegación | `go_router` | Rutas declarativas, deep-linking futuro |
@@ -21,6 +22,8 @@ lib/
 ├── main.dart
 ├── app.dart
 ├── core/
+│   ├── build_info/     # versión/build/commit en runtime (package_info_plus)
+│   ├── responsive/     # breakpoints + ancho máximo de contenido
 │   ├── theme/          # ThemeData claro/oscuro, paleta de colores
 │   └── utils/          # extensiones de DateTime, etc.
 ├── features/
@@ -41,7 +44,7 @@ lib/
 │   └── widgets/        # widgets reutilizables
 └── routes/
     ├── app_router.dart     # StatefulShellRoute (calendario/backlog)
-    └── main_shell.dart     # NavigationBar
+    └── main_shell.dart     # NavigationBar (compact) / NavigationRail (medium+)
 ```
 
 ## Modelo de dominio

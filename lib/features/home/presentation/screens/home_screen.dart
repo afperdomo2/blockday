@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/responsive/constrained_content.dart';
 import '../../../../core/theme/activity_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -51,51 +52,54 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.sm,
-          AppSpacing.lg,
-          AppSpacing.jumbo * 2,
-        ),
-        children: [
-          _TodayHeader(date: today),
-          const SizedBox(height: AppSpacing.md),
-          _QuickActions(today: today),
-          const SizedBox(height: AppSpacing.lg),
-          _WeekSummary(progress: weekly),
-          const SizedBox(height: AppSpacing.xl),
-          SectionHeader(
-            title: 'Programado hoy',
-            count: todayOccurrences.length,
+      body: ConstrainedContent(
+        maxWidth: AppContentWidth.list,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.sm,
+            AppSpacing.lg,
+            AppSpacing.jumbo * 2,
           ),
-          if (todayOccurrences.isEmpty)
-            const _EmptyText('Sin actividades hoy')
-          else
-            ...todayOccurrences.map((o) => _OccurrenceTile(occurrence: o)),
-          const SizedBox(height: AppSpacing.xl),
-          SectionHeader(title: 'Próximos', count: upcoming.length),
-          if (upcoming.isEmpty)
-            const _EmptyText('Sin eventos en los próximos días')
-          else
-            ...upcoming
-                .take(8)
-                .map((o) => _OccurrenceTile(occurrence: o, showDate: true)),
-          const SizedBox(height: AppSpacing.xl),
-          SectionHeader(
-            title: 'Tareas sin programar',
-            count: pendingTasks.length,
-          ),
-          if (pendingTasks.isEmpty)
-            const _EmptyText('Nada pendiente. Todo está programado.')
-          else
-            ...pendingTasks.map(
-              (t) => TaskTile(
-                task: t,
-                onTap: () => context.go('/backlog/task/${t.id}'),
-              ),
+          children: [
+            _TodayHeader(date: today),
+            const SizedBox(height: AppSpacing.md),
+            _QuickActions(today: today),
+            const SizedBox(height: AppSpacing.lg),
+            _WeekSummary(progress: weekly),
+            const SizedBox(height: AppSpacing.xl),
+            SectionHeader(
+              title: 'Programado hoy',
+              count: todayOccurrences.length,
             ),
-        ],
+            if (todayOccurrences.isEmpty)
+              const _EmptyText('Sin actividades hoy')
+            else
+              ...todayOccurrences.map((o) => _OccurrenceTile(occurrence: o)),
+            const SizedBox(height: AppSpacing.xl),
+            SectionHeader(title: 'Próximos', count: upcoming.length),
+            if (upcoming.isEmpty)
+              const _EmptyText('Sin eventos en los próximos días')
+            else
+              ...upcoming
+                  .take(8)
+                  .map((o) => _OccurrenceTile(occurrence: o, showDate: true)),
+            const SizedBox(height: AppSpacing.xl),
+            SectionHeader(
+              title: 'Tareas sin programar',
+              count: pendingTasks.length,
+            ),
+            if (pendingTasks.isEmpty)
+              const _EmptyText('Nada pendiente. Todo está programado.')
+            else
+              ...pendingTasks.map(
+                (t) => TaskTile(
+                  task: t,
+                  onTap: () => context.go('/backlog/task/${t.id}'),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
